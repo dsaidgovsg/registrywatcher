@@ -1,0 +1,36 @@
+# Webserver
+server_listening_address = "0.0.0.0:8080"
+
+# Worker
+poll_interval = "5s"
+
+# Docker Client
+watched_repositories = ["testrepo"]
+
+# Postgres Client
+database_url = "postgresql://registry-watcher:registry-watcher@localhost:5432/registry-watcher?sslmode=disable"
+create_database_schema = true
+
+# Tests
+is_test = true
+base_public_image = "library/redis"
+registry_container_image = "registry:2"
+registry_container_port = "5000"
+postgres_container_image = "postgres:9.6.2"
+postgres_container_port = "5432"
+
+# Docker Registry information (to be interpolated by Nomad)
+[registry_map.localregistry]
+registry_scheme = "https"
+registry_domain = "localhost:5000"
+registry_prefix = "prefix"
+registry_auth = "YmxhaDpibGFoCg=="
+
+# Nomad Client
+[repo_map.testrepo]
+registry_name = "localregistry"
+nomad_job_name = "testrepo"
+
+# config:   "basicauth.yml",
+# username: "admin",
+# password: "testing"

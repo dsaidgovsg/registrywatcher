@@ -1,0 +1,10 @@
+docker-registry-watcher
+*.toml
+!test.toml
+!sample.toml
+
+# dependencies
+node_modules
+
+# logs
+npm-debug.log
