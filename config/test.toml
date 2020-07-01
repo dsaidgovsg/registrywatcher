@@ -5,7 +5,7 @@ server_listening_address = "0.0.0.0:8080"
 poll_interval = "5s"
 
 # Docker Client
-watched_repositories = ["testrepo"]
+watched_repositories = ["someproject.testrepo"]
 
 # Postgres Client
 database_url = "postgresql://registry-watcher:registry-watcher@localhost:5432/registry-watcher?sslmode=disable"

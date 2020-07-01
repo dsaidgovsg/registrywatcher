@@ -145,6 +145,9 @@ func DecodeAuthString(encoded string) (string, string, error) {
 }
 
 func ConstructImageName(domain, prefix, repoName, tag string) string {
+	// hack to fetch from registry-1.docker.io/v2/....
+	//         but deploy docker.io/repoName:tag
+	domain = strings.Replace(domain, "registry-1.", "", -1)
 	return fmt.Sprintf("%s/%s/%s:%s",
 		domain,
 		prefix,
