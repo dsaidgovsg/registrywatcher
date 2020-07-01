@@ -142,8 +142,9 @@ func (client *Clients) DeployPinnedTag(conf *viper.Viper, repoName string) {
 		log.LogAppErr(fmt.Sprintf("Couldn't fetch pinned tag while deploying pinned tag for %s", repoName), err)
 		return
 	}
-	jobID := utils.GetJobOfRepo(conf, repoName)
-	client.NomadClient.UpdateNomadJobTag(jobID, repoName, pinnedTag)
+	jobID := utils.GetRepoNomadJob(conf, repoName)
+	taskName := utils.GetRepoNomadTaskName(conf, repoName)
+	client.NomadClient.UpdateNomadJobTag(jobID, repoName, taskName, pinnedTag)
 }
 
 func (client *Clients) PopulateCaches(repoName string) {
@@ -228,7 +229,7 @@ func (client *Clients) updateDigestCache(repoName string, digest string) {
 }
 
 func (client *Clients) isPinnedTagDeployed(conf *viper.Viper, repoName string) (bool, error) {
-	jobID := utils.GetJobOfRepo(conf, repoName)
+	jobID := utils.GetRepoNomadJob(conf, repoName)
 	deployedTag, err := client.NomadClient.GetNomadJobTag(jobID, repoName)
 	if err != nil {
 		log.LogAppErr(fmt.Sprintf("Couldn't fetch nomad job tag while checking deployed tag for %s", repoName), err)

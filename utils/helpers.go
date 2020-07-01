@@ -153,9 +153,17 @@ func ConstructImageName(domain, prefix, repoName, tag string) string {
 	)
 }
 
-func GetJobOfRepo(conf *viper.Viper, repoName string) string {
+// Get the Nomad job name config mapping for repoName
+func GetRepoNomadJob(conf *viper.Viper, repoName string) string {
 	repoMap := conf.Get("repo_map").(map[string]interface{})
 	jobID := repoMap[repoName].(map[string]interface{})["nomad_job_name"].(string)
+	return jobID
+}
+
+// Get the Nomad task name config mapping for repoName
+func GetRepoNomadTaskName(conf *viper.Viper, repoName string) string {
+	repoMap := conf.Get("repo_map").(map[string]interface{})
+	jobID := repoMap[repoName].(map[string]interface{})["nomad_task_name"].(string)
 	return jobID
 }
 
