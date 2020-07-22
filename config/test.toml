@@ -30,6 +30,7 @@ registry_auth = "YmxhaDpibGFoCg=="
 [repo_map.testrepo]
 registry_name = "localregistry"
 nomad_job_name = "testrepo"
+nomad_task_name = "testrepo"
 
 # config:   "basicauth.yml",
 # username: "admin",

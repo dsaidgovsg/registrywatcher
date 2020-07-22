@@ -31,3 +31,4 @@ registry_auth = "$YOUR_AUTH_STRING_HERE"
 [repo_map.registrywatcher]
 registry_name = "codefresh"
 nomad_job_name = "registrywatcher"
+nomad_task_name = "registrywatcher"

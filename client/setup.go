@@ -71,7 +71,7 @@ func SetUpClientTest(t *testing.T) *testEngine {
 }
 
 func (te *testEngine) RegisterJob() {
-	jobID := utils.GetJobOfRepo(te.Conf, te.TestRepoName)
+	jobID := utils.GetRepoNomadJob(te.Conf, te.TestRepoName)
 	tags, _ := te.Clients.DockerRegistryClient.GetAllTags(te.TestRepoName)
 	dockerImage := fmt.Sprintf("%s:%s", te.TestRepoName, tags[0])
 	job := testJob(jobID, dockerImage)

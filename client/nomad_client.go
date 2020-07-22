@@ -71,9 +71,11 @@ func (client *NomadClient) GetNomadJobTag(jobID, imageName string) (string, erro
 // Updates one image in a Nomad job, unless the Nomad jobspec is registrywatcher itself.
 // Since the registrywatcher Nomad jobspec contains 2 images (UI and backend), it will update
 // both images before it restarts itself.
-func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, desiredTag string) {
+func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, taskName, desiredTag string) {
 	_, registryDomain, registryPrefix, _ := utils.ExtractRegistryInfo(client.conf, imageName)
 	desiredFullImageName := utils.ConstructImageName(registryDomain, registryPrefix, imageName, desiredTag)
+	matchFound := false
+	log.LogAppInfo(fmt.Sprintf("Full image name to deploy %s", desiredFullImageName))
 	job, err := client.getNomadJob(jobID)
 	if err != nil {
 		log.LogAppErr(fmt.Sprintf("Couldn't find jobID %s", jobID), err)
@@ -81,10 +83,8 @@ func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, desiredTag string
 	}
 	for i, taskGroup := range job.TaskGroups {
 		for j, task := range taskGroup.Tasks {
-			fullImageName := getNomadJobImageFromTask(task)
-			arr := strings.Split(fullImageName, "/")
-			taskImageName := arr[len(arr)-1]
-			if taskImageName == imageName {
+			if task.Name == taskName {
+				matchFound = true
 				// to avoid unexpected issues we use the prefix from config
 				// its possible that what is deployed may be from a different registry
 				job.TaskGroups[i].Tasks[j].Config["image"] = desiredFullImageName
@@ -94,7 +94,8 @@ func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, desiredTag string
 			}
 			// bootstrapping. the nomad job "registrywatcher" also contains
 			// a task/container of the ui image.
-			if taskImageName == "registrywatcher-ui" {
+			if taskName == "registrywatcher-ui" {
+				matchFound = true
 				uiFullImageName := utils.ConstructImageName(
 					registryDomain, registryPrefix, "registrywatcher-ui", desiredTag)
 				job.TaskGroups[i].Tasks[j].Config["image"] = uiFullImageName
@@ -108,7 +109,11 @@ func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, desiredTag string
 		job.VaultToken = &vaultToken
 	}
 
-	go client.RestartNomadJob(&job, desiredTag)
+	if matchFound {
+		go client.RestartNomadJob(&job, desiredTag)
+	} else {
+		utils.PostSlackError(client.conf, fmt.Sprintf("Mapped task name %s not found in Nomad job %s. Please check deployment configuration.", taskName, *job.ID))
+	}
 }
 
 // Modify a flag that should not affect the operation of a Nomad jobspec
