@@ -18,6 +18,7 @@ type Clients struct {
 	NomadClient          *NomadClient
 	DockerRegistryClient *DockerRegistryClient
 	PostgresClient       *PostgresClient
+	DockerhubApi 				 *DockerhubApi
 	DockerTags           sync.Map
 	DigestMap            sync.Map
 
@@ -31,6 +32,7 @@ func SetUpClients(conf *viper.Viper) *Clients {
 		panic(fmt.Errorf("starting postgres client failed: %v", err))
 	}
 	dockerClient := InitializeDockerRegistryClient(conf)
+	dockerhubApi := InitializeDockerhubApi(conf)
 
 	// caching fields
 	dockerTags := sync.Map{}
@@ -43,6 +45,7 @@ func SetUpClients(conf *viper.Viper) *Clients {
 		NomadClient:          InitializeNomadClient(conf),
 		PostgresClient:       postgresClient,
 		DockerRegistryClient: dockerClient,
+		DockerhubApi:         dockerhubApi,
 		DockerTags:           dockerTags,
 		DigestMap:            digestMap,
 	}

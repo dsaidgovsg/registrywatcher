@@ -70,6 +70,7 @@ func SetUpRouter(conf *viper.Viper, clients *client.Clients) *gin.Engine {
 	r.GET("/tags/:repo_name", handler.GetTagHandler)
 	r.GET("/repos", handler.RepoSummaryHandler)
 	r.GET("/debug/caches", handler.CacheSummaryHandler)
+	r.POST("/tags/:repo_name/listener", handler.DockerhubWebhookListener)
 
 	return r
 }
@@ -106,6 +107,14 @@ type Handler struct {
 type deployBody struct {
 	PinnedTag  *string `json:"pinned_tag",omitempty`
 	AutoDeploy *bool   `json:"auto_deploy",omitempty`
+}
+
+type webhookBody struct {
+	PushData *pushData `json:"push_data"`
+}
+
+type pushData struct {
+	Tag *string `json:"tag"`
 }
 
 func (h *Handler) ResetTagHandler(c *gin.Context) {
@@ -359,4 +368,56 @@ func (h *Handler) CacheSummaryHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, rtn)
+}
+
+func (h *Handler) DockerhubWebhookListener(c *gin.Context) {
+	// check if repoName is valid
+	repoName := c.Param("repo_name")
+	validName := false
+	for _, repo := range h.conf.GetStringSlice("watched_repositories") {
+		if repoName == repo {
+			validName = true
+			break
+		}
+	}
+	if !validName {
+		_, registryDomain, _, _ := utils.ExtractRegistryInfo(h.conf, repoName)
+		c.JSON(400, gin.H{
+			"message": fmt.Sprintf("Error: The specified repo name %s is not inside the docker repository registry %s", repoName, registryDomain),
+		})
+		return
+	}
+
+	pinnedTag, err := h.clients.PostgresClient.GetPinnedTag(repoName)
+	if err != nil {
+		log.LogAppErr(fmt.Sprintf("Couldn't fetch pinned tag while checking whether to deploy for %s", repoName), err)
+		c.JSON(500, gin.H{
+			"message": fmt.Sprintf("Unable to fetch repo %s tag, err: %s", repoName, err),
+		})
+		return
+	}
+
+	var webhookBody webhookBody
+	err = c.BindJSON(&webhookBody)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": fmt.Sprintf("Error: %s", err),
+		})
+		return
+	}
+
+	if *(webhookBody.PushData.Tag) == pinnedTag {
+		utils.PostSlackUpdate(h.conf, fmt.Sprintf("Update: the SHA of tag `%s` in `%s` changed. Auto deployment will happen shortly.", pinnedTag, repoName))
+		log.LogAppInfo(fmt.Sprintf("Auto deploying tag %s for repo %s", pinnedTag, repoName))
+
+		h.clients.DeployPinnedTag(h.conf, repoName)
+		h.clients.UpdateCaches(repoName)
+		c.JSON(200, gin.H{
+			"message": fmt.Sprintf("Deploying to %s", pinnedTag),
+		})
+	} else {
+		c.JSON(200, gin.H{
+			"message": fmt.Sprintf("Received push data, branch %s not in deployment", pinnedTag),
+		})
+	}
 }

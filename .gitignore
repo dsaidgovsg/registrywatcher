@@ -1,4 +1,5 @@
 docker-registry-watcher
+registrywatcher
 *.toml
 !test.toml
 !sample.toml

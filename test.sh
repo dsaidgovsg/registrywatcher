@@ -8,7 +8,7 @@ assert_each_go_file () {
     failed_files=$(find . -type f -iname '*.go' -not -path "./.*/*" -exec $@ {} \;)
     printf "${failed_files}"
 
-    if [[ ${failed_files} ]]; then
+    if [ -n "${failed_files}" ]; then
         printf "\nFAILED!\n"
         exit 1
     fi
@@ -16,10 +16,6 @@ assert_each_go_file () {
 
 echo "-- gofmt check --"
 assert_each_go_file gofmt -l
-echo "OK"
-
-echo "-- golint check --"
-assert_each_go_file golint
 echo "OK"
 
 echo "-- go unit tests --"
