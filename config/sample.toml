@@ -18,6 +18,7 @@ create_database_schema = true
 
 # Dockerhub API Client
 dockerhub_url = "https://hub.docker.com"
+dockerhub_namespace = "namespace"
 
 # Tests
 is_test = false
