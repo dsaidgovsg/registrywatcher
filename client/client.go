@@ -32,7 +32,10 @@ func SetUpClients(conf *viper.Viper) *Clients {
 		panic(fmt.Errorf("starting postgres client failed: %v", err))
 	}
 	dockerClient := InitializeDockerRegistryClient(conf)
-	dockerhubApi := InitializeDockerhubApi(conf)
+	dockerhubApi, err := InitializeDockerhubApi(conf)
+	if err != nil {
+		log.LogAppErr("error initializing dockerhub API client", err)
+	}
 
 	// caching fields
 	dockerTags := sync.Map{}
@@ -165,11 +168,12 @@ func (client *Clients) PopulateCaches(repoName string) {
 	if err != nil {
 		log.LogAppErr(fmt.Sprintf("Couldn't fetch pinned tag while populating cache for %s", repoName), err)
 	}
-	tagDigest, err := client.DockerRegistryClient.GetTagDigest(repoName, pinnedTag)
-	client.updateDigestCache(repoName, tagDigest)
+	tagDigest, err := client.DockerhubApi.GetTagDigestFromApi(repoName, pinnedTag)
 	if err != nil {
-		log.LogAppErr(fmt.Sprintf("Couldn't fetch tag digest from registry while populating cache for %s", repoName), err)
+		log.LogAppErr(fmt.Sprintf("Couldn't fetch tag digest from Dockerhub while populating cache for %s", repoName), err)
+		return
 	}
+	client.updateDigestCache(repoName, *tagDigest)
 }
 
 func (client *Clients) isNewReleaseTagAvailable(repoName string) bool {
@@ -252,18 +256,18 @@ func (client *Clients) isTagDigestChanged(repoName string) (bool, error) {
 		log.LogAppErr(fmt.Sprintf("Couldn't fetch pinned tag while checking if it was changed for %s", repoName), err)
 		return false, err
 	}
-	tagDigest, err := client.DockerRegistryClient.GetTagDigest(repoName, pinnedTag)
-	if err != nil {
-		log.LogAppErr(fmt.Sprintf("Couldn't fetch tag digest from registry while checking if it was changed for %s", repoName), err)
-		return false, err
-	}
 	cachedTagDigest, err := client.GetCachedTagDigest(repoName)
 	if err != nil {
 		log.LogAppErr(fmt.Sprintf("Couldn't fetch tag digest from cache while checking if it was changed for %s", repoName), err)
 		return false, err
 	}
+	digestIsCurrent, err := client.DockerhubApi.CheckImageIsCurrent(repoName, cachedTagDigest, pinnedTag)
+	if err != nil {
+		log.LogAppErr("Couldn't check if tag currently points to cached image digest", err)
+		return false, err
+	}
 
-	return cachedTagDigest != tagDigest, nil
+	return *digestIsCurrent, nil
 }
 
 func (client *Clients) UpdateCaches(repoName string) {
@@ -285,7 +289,7 @@ func (client *Clients) UpdateCaches(repoName string) {
 			log.LogAppErr(fmt.Sprintf("Couldn't fetch pinned tag while updating cache for %s", repoName), err)
 			return
 		}
-		tagDigest, err := client.DockerRegistryClient.GetTagDigest(repoName, pinnedTag)
+		tagDigest, err := client.DockerhubApi.GetTagDigestFromApi(repoName, pinnedTag)
 		if err != nil {
 			log.LogAppErr(fmt.Sprintf("Couldn't fetch tag digest from registry while updating cache for %s", repoName), err)
 			return
@@ -297,9 +301,9 @@ func (client *Clients) UpdateCaches(repoName string) {
 			log.LogAppErr(fmt.Sprintf("Couldn't fetch tag digest from cache while updating cache for %s", repoName), err)
 			return
 		}
-		log.LogAppInfo(fmt.Sprintf("cached digest: %s, new digest: %s", cachedTagDigest, tagDigest))
+		log.LogAppInfo(fmt.Sprintf("cached digest: %s, new digest: %s", cachedTagDigest, *tagDigest))
 
-		client.updateDigestCache(repoName, tagDigest)
+		client.updateDigestCache(repoName, *tagDigest)
 	}
 }
 

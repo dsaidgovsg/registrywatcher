@@ -28,8 +28,8 @@ func (te *testEngine) printState() {
 	fmt.Println("cached tags", cachedTags)
 
 	pinnedTag, _ := te.Clients.GetFormattedPinnedTag(te.TestRepoName)
-	registryTagDigest, _ := te.Clients.DockerRegistryClient.GetTagDigest(te.TestRepoName, pinnedTag)
-	fmt.Println("registry tag digest", registryTagDigest)
+	registryTagDigest, _ := te.Clients.DockerhubApi.GetTagDigestFromApi(te.TestRepoName, pinnedTag)
+	fmt.Println("registry tag digest", *registryTagDigest)
 
 	cachedTagDigest, _ := te.Clients.GetCachedTagDigest(te.TestRepoName)
 	fmt.Println("cached tag digest", cachedTagDigest)
