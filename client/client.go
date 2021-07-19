@@ -18,7 +18,7 @@ type Clients struct {
 	NomadClient          *NomadClient
 	DockerRegistryClient *DockerRegistryClient
 	PostgresClient       *PostgresClient
-	DockerhubApi 				 *DockerhubApi
+	DockerhubApi         *DockerhubApi
 	DockerTags           sync.Map
 	DigestMap            sync.Map
 
