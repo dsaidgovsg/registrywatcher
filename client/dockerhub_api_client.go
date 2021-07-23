@@ -95,7 +95,7 @@ func (api *DockerhubApi) CheckImageIsCurrent(repository, digest string, checkTag
 	endpoint := fmt.Sprintf("/v2/namespaces/%s/repositories/%s/images/%s/tags",
 		api.namespace, repository, digest)
 	addr := fmt.Sprintf("%s%s", api.url, endpoint)
-	log.LogAppInfo(fmt.Sprintf("dockerhub check image is current, url=%s", addr))
+	log.LogAppInfo(fmt.Sprintf("dockerhub check if image is current, url=%s", addr))
 
 	req, err := http.NewRequest("GET", addr, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", api.token))
