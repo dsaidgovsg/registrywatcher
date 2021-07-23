@@ -267,7 +267,7 @@ func (client *Clients) isTagDigestChanged(repoName string) (bool, error) {
 		return false, err
 	}
 
-	return *digestIsCurrent, nil
+	return !*digestIsCurrent, nil
 }
 
 func (client *Clients) UpdateCaches(repoName string) {
