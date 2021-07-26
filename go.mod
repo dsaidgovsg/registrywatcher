@@ -12,7 +12,7 @@ require (
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-gonic/gin v1.4.0
-	github.com/gorilla/mux v1.7.1 // indirect
+	github.com/gorilla/mux v1.7.1
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/hashicorp/consul v1.4.4 // indirect
 	github.com/hashicorp/go-hclog v0.9.2 // indirect

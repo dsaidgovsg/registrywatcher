@@ -116,17 +116,24 @@ You need to make one modification to your docker daemon config (usually at ~/.do
 Add the flag `--insecure-registry localhost:5000` to your docker daemon, documented [here](https://docs.docker.com/registry/insecure/) for testing against an insecure registry.
 
 You may need to update the certificates from time to time.
+
+Find `GOROOT` via
+
+```bash
+go env
 ```
-go run /usr/local/go/src/crypto/tls/generate_cert.go --host localhost,127.0.0.1 --ca
-	mv $(CURDIR)/key.pem $(CURDIR)/testutils/snakeoil/key.pem
-	mv $(CURDIR)/cert.pem $(CURDIR)/testutils/snakeoil/cert.pem
+
+```bash
+go run $GOROOT/src/crypto/tls/generate_cert.go --host localhost,127.0.0.1 --ca
+mv $(CURDIR)/key.pem $(CURDIR)/testutils/snakeoil/key.pem
+mv $(CURDIR)/cert.pem $(CURDIR)/testutils/snakeoil/cert.pem
 ```
 
 ## Tests
 
 Run locally:
 
-```
+```bash
 // run both integration and unit tests
 gotestsum -- -tags="integration unit" ./...
 ```

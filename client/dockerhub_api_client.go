@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 
 	"github.com/dsaidgovsg/registrywatcher/log"
 	"github.com/pkg/errors"
@@ -203,4 +204,15 @@ func (api *DockerhubApi) GetTagDigestFromApi(repository string, checkTag string)
 
 	// image tag not found in repository's 100 last active tags
 	return nil, errors.New(fmt.Sprintf("Tag %s not found in repository %s", checkTag, repository))
+}
+
+func InitializeDockerhubTestApi(ts *httptest.Server) *DockerhubApi {
+	client := DockerhubApi{
+		url:       ts.URL,
+		namespace: "namespace",
+		username:  "username",
+		secret:    "secret",
+		token:     "fake token",
+	}
+	return &client
 }

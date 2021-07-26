@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/dsaidgovsg/registrywatcher/config"
@@ -17,6 +18,7 @@ type testEngine struct {
 	Conf         *viper.Viper
 	helper       *testutils.TestHelper
 	Clients      *Clients
+	MockServer   *httptest.Server
 	TestRepoName string
 }
 
@@ -61,8 +63,11 @@ func SetUpClientTest(t *testing.T) *testEngine {
 	te.containerIDs = append(te.containerIDs, regID)
 	te.containerIDs = append(te.containerIDs, pgID)
 
+	// initialize mock server
+	te.MockServer = testutils.SetUpMockDockerhubServer()
+
 	// initialize the clients
-	te.Clients = SetUpTestClients(t, conf)
+	te.Clients = SetUpTestClients(t, conf, te.MockServer)
 
 	// we use this so much might as well keep it in the struct
 	te.TestRepoName = te.Conf.GetStringSlice("watched_repositories")[0]
@@ -129,6 +134,8 @@ func (te *testEngine) PushNewTag(namedTag, actualTag string) {
 	mockImageName := utils.ConstructImageName(registryDomain, registryPrefix, te.TestRepoName, namedTag)
 	publicImageName := fmt.Sprintf("%s:%s", te.Conf.GetString("base_public_image"), actualTag)
 	err := te.helper.AddImageToRegistry(publicImageName, mockImageName)
+
+	// te.MockServer.ImageTag[actualTag] = namedTag
 	if err != nil {
 		panic(fmt.Errorf("couldn't add image to registry: %v", err))
 	}

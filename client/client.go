@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"net/http/httptest"
 	"reflect"
 	"sort"
 	"sync"
@@ -55,7 +56,7 @@ func SetUpClients(conf *viper.Viper) *Clients {
 	return &clients
 }
 
-func SetUpTestClients(t *testing.T, conf *viper.Viper) *Clients {
+func SetUpTestClients(t *testing.T, conf *viper.Viper, te *httptest.Server) *Clients {
 	postgresClient, err := InitializePostgresClient(conf)
 	if err != nil {
 		panic(fmt.Errorf("starting postgres client failed: %v", err))
@@ -90,6 +91,7 @@ func SetUpTestClients(t *testing.T, conf *viper.Viper) *Clients {
 		NomadServer:          ns,
 		PostgresClient:       postgresClient,
 		DockerRegistryClient: InitializeDockerRegistryClient(conf),
+		DockerhubApi:         InitializeDockerhubTestApi(te),
 		DockerTags:           dockerTags,
 		DigestMap:            digestMap,
 	}
