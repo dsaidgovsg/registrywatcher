@@ -62,13 +62,3 @@ func (e *DockerRegistryClient) GetAllTags(repoName string) ([]string, error) {
 	tags, err := repoRegistry.Tags(fmt.Sprintf("%s/%s", registryPrefix, repoName))
 	return tags, err
 }
-
-func (e *DockerRegistryClient) GetTagDigest(repoName, tag string) (string, error) {
-	_, _, registryPrefix, _ := utils.ExtractRegistryInfo(e.conf, repoName)
-	repoRegistry := e.Hubs[repoName]
-	deserializedManifest, err := repoRegistry.ManifestV2(fmt.Sprintf("%s/%s", registryPrefix, repoName), tag)
-	if err != nil {
-		return "", err
-	}
-	return string(deserializedManifest.Manifest.Config.Digest), nil
-}
