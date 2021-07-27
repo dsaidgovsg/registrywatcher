@@ -3,9 +3,8 @@
 package client
 
 import (
-	"testing"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 // test ShouldDeploy for a multitude of conditions

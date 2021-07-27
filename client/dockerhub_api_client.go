@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/dsaidgovsg/registrywatcher/log"
-	"github.com/dsaidgovsg/registrywatcher/testutils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -204,15 +203,4 @@ func (api *DockerhubApi) GetTagDigestFromApi(repository string, checkTag string)
 
 	// image tag not found in repository's 100 last active tags
 	return nil, errors.New(fmt.Sprintf("Tag %s not found in repository %s", checkTag, repository))
-}
-
-func InitializeDockerhubTestApi(mds *testutils.MockDockerhubServer) *DockerhubApi {
-	client := DockerhubApi{
-		url:       mds.Ts.URL,
-		namespace: "namespace",
-		username:  "username",
-		secret:    "secret",
-		token:     "fake token",
-	}
-	return &client
 }

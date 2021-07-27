@@ -10,6 +10,11 @@ import (
 	"github.com/dsaidgovsg/registrywatcher/utils"
 	nomad "github.com/hashicorp/nomad/api"
 	"github.com/spf13/viper"
+
+	"encoding/json"
+	"github.com/gorilla/mux"
+	"net/http"
+	"net/http/httptest"
 )
 
 type testEngine struct {
@@ -17,7 +22,8 @@ type testEngine struct {
 	Conf         *viper.Viper
 	helper       *testutils.TestHelper
 	Clients      *Clients
-	MockServer   *testutils.MockDockerhubServer
+	ImageTagMap  map[string][]string
+	Ts           *httptest.Server
 	TestRepoName string
 }
 
@@ -63,14 +69,73 @@ func SetUpClientTest(t *testing.T) *testEngine {
 	te.containerIDs = append(te.containerIDs, pgID)
 
 	// initialize mock server
-	te.MockServer = testutils.SetUpMockDockerhubServer(make(map[string]string))
+	te.ImageTagMap = make(map[string][]string)
 
 	// initialize the clients
-	te.Clients = SetUpTestClients(t, conf, te.MockServer)
+	te.Clients = SetUpTestClients(t, conf)
 
 	// we use this so much might as well keep it in the struct
 	te.TestRepoName = te.Conf.GetStringSlice("watched_repositories")[0]
 
+	// set up mock Dockerhub API and imageTag store
+	router := mux.NewRouter()
+
+	router.HandleFunc("/v2/users/login", func(res http.ResponseWriter, req *http.Request) {
+		res.Write([]byte(`{"token": "test token"}`))
+	}).Methods("GET")
+
+	router.HandleFunc("/v2/namespaces/{namespace}/repositories/{repo}/images/{digest}/tags",
+		func(res http.ResponseWriter, req *http.Request) {
+			vars := mux.Vars(req)
+			digest := vars["digest"]
+
+			res.Header().Set("Content-Type", "application/json")
+			res.WriteHeader(http.StatusOK)
+
+			if tagSlice, ok := te.ImageTagMap[digest]; ok {
+				var tags []TagWithStatus
+				for enum, tag := range tagSlice {
+					tags = append(tags, TagWithStatus{Tag: tag, IsCurrent: enum == 0})
+				}
+				results := CheckImageResp{Results: tags}
+				data, _ := json.Marshal(results)
+				res.Write(data)
+			} else {
+				results := CheckImageResp{Results: nil}
+				data, _ := json.Marshal(results)
+				res.Write(data)
+			}
+		}).Methods("GET")
+
+	router.HandleFunc("/v2/namespaces/namespace/repositories/testrepo/images",
+		func(res http.ResponseWriter, req *http.Request) {
+			var resSlice []GetTagDigestResult
+			for image, tagSlice := range te.ImageTagMap {
+				var tags []TagWithStatus
+				for enum, tag := range tagSlice {
+					tags = append(tags, TagWithStatus{Tag: tag, IsCurrent: enum == 0})
+				}
+				resSlice = append(resSlice, GetTagDigestResult{Digest: image, Tags: tags})
+			}
+			res.Header().Set("Content-Type", "application/json")
+			res.WriteHeader(http.StatusOK)
+			results := GetTagDigestResp{Results: resSlice}
+			data, _ := json.Marshal(results)
+			res.Write(data)
+		})
+
+	ts := httptest.NewServer(router)
+	te.Ts = ts
+
+	dockerhubApi := DockerhubApi{
+		url:       ts.URL,
+		namespace: "namespace",
+		username:  "username",
+		secret:    "secret",
+		token:     "fake token",
+	}
+
+	te.Clients.DockerhubApi = &dockerhubApi
 	return &te
 }
 
@@ -124,6 +189,7 @@ func (te *testEngine) TearDown() {
 			log.LogAppErr("Couldn't remove container", err)
 		}
 	}
+	te.Ts.Close()
 }
 
 // named tag is what it will appear as in the docker registryDomain
@@ -134,7 +200,9 @@ func (te *testEngine) PushNewTag(namedTag, actualTag string) {
 	publicImageName := fmt.Sprintf("%s:%s", te.Conf.GetString("base_public_image"), actualTag)
 	err := te.helper.AddImageToRegistry(publicImageName, mockImageName)
 
-	// te.MockServer.ImageTag[actualTag] = namedTag
+	originalTags := te.ImageTagMap[actualTag]
+	te.ImageTagMap[actualTag] = append([]string{namedTag}, originalTags...)
+
 	if err != nil {
 		panic(fmt.Errorf("couldn't add image to registry: %v", err))
 	}

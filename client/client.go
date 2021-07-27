@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/dsaidgovsg/registrywatcher/log"
-	"github.com/dsaidgovsg/registrywatcher/testutils"
 	"github.com/dsaidgovsg/registrywatcher/utils"
 	nomad "github.com/hashicorp/nomad/api"
 	"github.com/hashicorp/nomad/testutil"
@@ -56,7 +55,7 @@ func SetUpClients(conf *viper.Viper) *Clients {
 	return &clients
 }
 
-func SetUpTestClients(t *testing.T, conf *viper.Viper, mds *testutils.MockDockerhubServer) *Clients {
+func SetUpTestClients(t *testing.T, conf *viper.Viper) *Clients {
 	postgresClient, err := InitializePostgresClient(conf)
 	if err != nil {
 		panic(fmt.Errorf("starting postgres client failed: %v", err))
@@ -91,7 +90,7 @@ func SetUpTestClients(t *testing.T, conf *viper.Viper, mds *testutils.MockDocker
 		NomadServer:          ns,
 		PostgresClient:       postgresClient,
 		DockerRegistryClient: InitializeDockerRegistryClient(conf),
-		DockerhubApi:         InitializeDockerhubTestApi(mds),
+		DockerhubApi:         nil,
 		DockerTags:           dockerTags,
 		DigestMap:            digestMap,
 	}
@@ -329,10 +328,14 @@ func (client *Clients) ShouldDeploy(repoName string) (bool, error) {
 	isDigestChanged, err := client.isTagDigestChanged(repoName)
 	if err != nil {
 		log.LogAppErr(fmt.Sprintf("Couldn't check tag digest changed while checking whether to deploy for %s", repoName), err)
+		fmt.Println("returning at isDigestChanged, ", err)
 		return false, err
 	}
 
 	if (pinnedTag == "" && client.isNewReleaseTagAvailable(repoName)) || isDigestChanged {
+		fmt.Println("returning 1")
+		fmt.Println("isTagDigestChanged", isDigestChanged)
+		fmt.Println("isNewReleaseTagAvailable", client.isNewReleaseTagAvailable(repoName))
 		return true, nil
 	}
 
