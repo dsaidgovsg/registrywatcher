@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
 
 	"github.com/dsaidgovsg/registrywatcher/log"
+	"github.com/dsaidgovsg/registrywatcher/testutils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -206,9 +206,9 @@ func (api *DockerhubApi) GetTagDigestFromApi(repository string, checkTag string)
 	return nil, errors.New(fmt.Sprintf("Tag %s not found in repository %s", checkTag, repository))
 }
 
-func InitializeDockerhubTestApi(ts *httptest.Server) *DockerhubApi {
+func InitializeDockerhubTestApi(mds *testutils.MockDockerhubServer) *DockerhubApi {
 	client := DockerhubApi{
-		url:       ts.URL,
+		url:       mds.Ts.URL,
 		namespace: "namespace",
 		username:  "username",
 		secret:    "secret",

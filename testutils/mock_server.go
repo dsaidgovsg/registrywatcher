@@ -8,9 +8,13 @@ import (
 	"strings"
 )
 
-func SetUpMockDockerhubServer() *httptest.Server {
+type MockDockerhubServer struct {
+	Ts *httptest.Server
+	ImageTag map[string]string
+}
+
+func SetUpMockDockerhubServer(imageTag map[string]string) *MockDockerhubServer {
 	router := mux.NewRouter()
-	ImageTag := make(map[string]string)
 
 	router.HandleFunc("/v2/users/login", func(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte(`{"token": "test token"}`))
@@ -21,7 +25,7 @@ func SetUpMockDockerhubServer() *httptest.Server {
 			vars := mux.Vars(req)
 			digest := vars["digest"]
 
-			if tag, ok := ImageTag[digest]; ok {
+			if tag, ok := imageTag[digest]; ok {
 				res.Write([]byte(fmt.Sprintf(`{"results": [{"tag": "%s", "is_current": true}]}`, tag)))
 			} else {
 				res.Write([]byte(`{"results": nil}`))
@@ -31,7 +35,7 @@ func SetUpMockDockerhubServer() *httptest.Server {
 	router.HandleFunc("/v2/namespaces/{namespace}/repositories/{repo}/images",
 		func(res http.ResponseWriter, req *http.Request) {
 			var resSlice []string
-			for image, tag := range ImageTag {
+			for image, tag := range imageTag {
 				imageStr := fmt.Sprintf(`{"digest": "%s", "tags": ["tag": "%s", "is_current": true]}`, image, tag)
 				resSlice = append(resSlice, imageStr)
 			}
@@ -42,5 +46,14 @@ func SetUpMockDockerhubServer() *httptest.Server {
 	ts := httptest.NewServer(router)
 	defer ts.Close()
 
-	return ts
+	mds := MockDockerhubServer{
+		Ts: ts,
+		ImageTag: imageTag,
+	}
+
+	return &mds
+}
+
+func (mds *MockDockerhubServer) PushNewTag (tag string, image string) {
+	mds.ImageTag[image] = tag
 }

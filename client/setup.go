@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/dsaidgovsg/registrywatcher/config"
@@ -18,7 +17,7 @@ type testEngine struct {
 	Conf         *viper.Viper
 	helper       *testutils.TestHelper
 	Clients      *Clients
-	MockServer   *httptest.Server
+	MockServer   *testutils.MockDockerhubServer
 	TestRepoName string
 }
 
@@ -64,7 +63,7 @@ func SetUpClientTest(t *testing.T) *testEngine {
 	te.containerIDs = append(te.containerIDs, pgID)
 
 	// initialize mock server
-	te.MockServer = testutils.SetUpMockDockerhubServer()
+	te.MockServer = testutils.SetUpMockDockerhubServer(make(map[string]string))
 
 	// initialize the clients
 	te.Clients = SetUpTestClients(t, conf, te.MockServer)
