@@ -328,14 +328,10 @@ func (client *Clients) ShouldDeploy(repoName string) (bool, error) {
 	isDigestChanged, err := client.isTagDigestChanged(repoName)
 	if err != nil {
 		log.LogAppErr(fmt.Sprintf("Couldn't check tag digest changed while checking whether to deploy for %s", repoName), err)
-		fmt.Println("returning at isDigestChanged, ", err)
 		return false, err
 	}
 
 	if (pinnedTag == "" && client.isNewReleaseTagAvailable(repoName)) || isDigestChanged {
-		fmt.Println("returning 1")
-		fmt.Println("isTagDigestChanged", isDigestChanged)
-		fmt.Println("isNewReleaseTagAvailable", client.isNewReleaseTagAvailable(repoName))
 		return true, nil
 	}
 

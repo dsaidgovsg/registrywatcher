@@ -139,8 +139,11 @@ func (api *DockerhubApi) CheckImageIsCurrent(repository, digest string, checkTag
 		}
 	}
 	// image tag does not match the tag to be checked
-	// this throws an error as the stored digest should match the tag
-	return nil, errors.New(fmt.Sprintf("Digest %s does not have tag %s", digest, checkTag))
+	// this means the cached digest belongs to a previous tag
+	// return false (not current) because we want the cache to be updated
+	log.LogAppInfo(fmt.Sprintf(fmt.Sprintf("Digest %s does not have tag %s", digest, checkTag)))
+	isCurrent := false
+	return &isCurrent, nil
 }
 
 // We can't just use the registry GetTagDigest because the digests from the

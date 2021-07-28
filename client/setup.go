@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/dsaidgovsg/registrywatcher/config"
@@ -12,9 +13,10 @@ import (
 	"github.com/spf13/viper"
 
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/gorilla/mux"
 )
 
 type testEngine struct {
@@ -22,7 +24,7 @@ type testEngine struct {
 	Conf         *viper.Viper
 	helper       *testutils.TestHelper
 	Clients      *Clients
-	ImageTagMap  map[string][]string
+	ImageTagMap  map[string][]string // digest: [tag, is_current]
 	Ts           *httptest.Server
 	TestRepoName string
 }
@@ -92,11 +94,9 @@ func SetUpClientTest(t *testing.T) *testEngine {
 			res.Header().Set("Content-Type", "application/json")
 			res.WriteHeader(http.StatusOK)
 
-			if tagSlice, ok := te.ImageTagMap[digest]; ok {
-				var tags []TagWithStatus
-				for enum, tag := range tagSlice {
-					tags = append(tags, TagWithStatus{Tag: tag, IsCurrent: enum == 0})
-				}
+			if tag, ok := te.ImageTagMap[digest]; ok {
+				isCurrent, _ := strconv.ParseBool(tag[1])
+				tags := []TagWithStatus{{Tag: tag[0], IsCurrent: isCurrent}}
 				results := CheckImageResp{Results: tags}
 				data, _ := json.Marshal(results)
 				res.Write(data)
@@ -110,11 +110,9 @@ func SetUpClientTest(t *testing.T) *testEngine {
 	router.HandleFunc("/v2/namespaces/namespace/repositories/testrepo/images",
 		func(res http.ResponseWriter, req *http.Request) {
 			var resSlice []GetTagDigestResult
-			for image, tagSlice := range te.ImageTagMap {
-				var tags []TagWithStatus
-				for enum, tag := range tagSlice {
-					tags = append(tags, TagWithStatus{Tag: tag, IsCurrent: enum == 0})
-				}
+			for image, tag := range te.ImageTagMap {
+				isCurrent, _ := strconv.ParseBool(tag[1])
+				tags := []TagWithStatus{{Tag: tag[0], IsCurrent: isCurrent}}
 				resSlice = append(resSlice, GetTagDigestResult{Digest: image, Tags: tags})
 			}
 			res.Header().Set("Content-Type", "application/json")
@@ -200,8 +198,15 @@ func (te *testEngine) PushNewTag(namedTag, actualTag string) {
 	publicImageName := fmt.Sprintf("%s:%s", te.Conf.GetString("base_public_image"), actualTag)
 	err := te.helper.AddImageToRegistry(publicImageName, mockImageName)
 
-	originalTags := te.ImageTagMap[actualTag]
-	te.ImageTagMap[actualTag] = append([]string{namedTag}, originalTags...)
+	imageDigest := testutils.RandSeq(10)
+	te.ImageTagMap[imageDigest] = []string{namedTag, "true"}
+
+	// make is_current false for images holding the same tag
+	for image, tag := range te.ImageTagMap {
+		if tag[0] == namedTag && image != imageDigest {
+			tag[1] = "false"
+		}
+	}
 
 	if err != nil {
 		panic(fmt.Errorf("couldn't add image to registry: %v", err))

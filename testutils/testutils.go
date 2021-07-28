@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"math/rand"
 	"net"
 	"net/http"
 	"os"
@@ -355,4 +356,14 @@ func ConstructRegistryAuth(identity, secret string) (string, error) {
 	}
 
 	return base64.URLEncoding.EncodeToString(buf), nil
+}
+
+func RandSeq(n int) string {
+	var letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]byte, n)
+	rand.Seed(time.Now().UnixNano())
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }

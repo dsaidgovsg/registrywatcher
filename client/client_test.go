@@ -3,8 +3,9 @@
 package client
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // test ShouldDeploy for a multitude of conditions
@@ -69,7 +70,8 @@ func TestAutoDeployLatestTag(t *testing.T) {
 	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)
 	te.Clients.UpdateCaches(te.TestRepoName)
 	tagToDeploy, _ = te.Clients.GetFormattedPinnedTag(te.TestRepoName)
-	assert.False(t, shouldDeploy)
+	// should re-deploy after pinned tag is changed
+	assert.True(t, shouldDeploy)
 	assert.Equal(t, "test", tagToDeploy)
 
 	// "test" is now based on "alpine", rather than the original "latest"
