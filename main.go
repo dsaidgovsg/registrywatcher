@@ -152,8 +152,6 @@ func (h *Handler) ResetTagHandler(c *gin.Context) {
 	} else {
 		log.LogAppInfo(fmt.Sprintf("Updated pinned_tag for repo %s from %s to %s succesfully, deployment of pinned_tag will happen shortly", repoName, originalTag, pinnedTag))
 		h.clients.DeployPinnedTag(h.conf, repoName)
-		// update after deploying new sha, so it will not trigger autodeployment
-		h.clients.UpdateCaches(repoName)
 		c.JSON(200, gin.H{
 			"message": fmt.Sprintf("Deploying to %s", pinnedTag),
 		})
@@ -236,8 +234,6 @@ func (h *Handler) DeployTagHandler(c *gin.Context) {
 	originalTag, err := h.clients.PostgresClient.GetPinnedTag(repoName)
 	if originalTag == pinnedTag {
 		h.clients.DeployPinnedTag(h.conf, repoName)
-		// update after deploying new sha, so it will not trigger autodeployment
-		h.clients.UpdateCaches(repoName)
 		c.JSON(200, gin.H{
 			"message": fmt.Sprintf("Deploying to %s", pinnedTag),
 		})
@@ -255,8 +251,6 @@ func (h *Handler) DeployTagHandler(c *gin.Context) {
 	} else {
 		log.LogAppInfo(fmt.Sprintf("Updated pinned_tag for repo %s from %s to %s succesfully, deployment of pinned_tag will happen shortly", repoName, originalTag, pinnedTag))
 		h.clients.DeployPinnedTag(h.conf, repoName)
-		// update after deploying new sha, so it will not trigger autodeployment
-		h.clients.UpdateCaches(repoName)
 		c.JSON(200, gin.H{
 			"message": fmt.Sprintf("Deploying to %s", pinnedTag),
 		})

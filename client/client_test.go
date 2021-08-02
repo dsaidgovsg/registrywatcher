@@ -31,7 +31,6 @@ func TestAutoDeployLatestTag(t *testing.T) {
 	te.PushNewTag(newTag, "latest")
 
 	shouldDeploy, _ := te.Clients.ShouldDeploy(te.TestRepoName)
-	te.Clients.UpdateCaches(te.TestRepoName)
 	tagToDeploy, _ := te.Clients.GetFormattedPinnedTag(te.TestRepoName)
 	// v0.0.2 is not a new release version
 	assert.False(t, shouldDeploy)
@@ -42,7 +41,6 @@ func TestAutoDeployLatestTag(t *testing.T) {
 	te.PushNewTag(newTag, "latest")
 
 	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)
-	te.Clients.UpdateCaches(te.TestRepoName)
 	tagToDeploy, _ = te.Clients.GetFormattedPinnedTag(te.TestRepoName)
 	// v0.2.0 is a new release version,
 	assert.True(t, shouldDeploy)
@@ -53,7 +51,6 @@ func TestAutoDeployLatestTag(t *testing.T) {
 	te.PushNewTag(newTag, "latest")
 
 	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)
-	te.Clients.UpdateCaches(te.TestRepoName)
 	tagToDeploy, _ = te.Clients.GetFormattedPinnedTag(te.TestRepoName)
 	// v0.0.9 is not a new release version
 	assert.False(t, shouldDeploy)
@@ -68,7 +65,6 @@ func TestAutoDeployLatestTag(t *testing.T) {
 	te.UpdatePinnedTag(newTag)
 
 	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)
-	te.Clients.UpdateCaches(te.TestRepoName)
 	tagToDeploy, _ = te.Clients.GetFormattedPinnedTag(te.TestRepoName)
 	// should re-deploy after pinned tag is changed
 	assert.True(t, shouldDeploy)
@@ -78,7 +74,6 @@ func TestAutoDeployLatestTag(t *testing.T) {
 	te.PushNewTag(newTag, "alpine")
 
 	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)
-	te.Clients.UpdateCaches(te.TestRepoName)
 	tagToDeploy, _ = te.Clients.GetFormattedPinnedTag(te.TestRepoName)
 	assert.True(t, shouldDeploy)
 	assert.Equal(t, "test", tagToDeploy)

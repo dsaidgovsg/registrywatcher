@@ -152,6 +152,8 @@ func (client *Clients) DeployPinnedTag(conf *viper.Viper, repoName string) {
 	jobID := utils.GetRepoNomadJob(conf, repoName)
 	taskName := utils.GetRepoNomadTaskName(conf, repoName)
 	client.NomadClient.UpdateNomadJobTag(jobID, repoName, taskName, pinnedTag)
+	// update after deploying new sha, so it will not trigger autodeployment
+	client.updateCaches(repoName)
 }
 
 func (client *Clients) PopulateCaches(repoName string) {
@@ -271,7 +273,7 @@ func (client *Clients) isTagDigestChanged(repoName string) (bool, error) {
 	return !*digestIsCurrent, nil
 }
 
-func (client *Clients) UpdateCaches(repoName string) {
+func (client *Clients) updateCaches(repoName string) {
 	validTags, err := client.getSHATags(repoName)
 	if err != nil {
 		log.LogAppErr(fmt.Sprintf("Couldn't fetch tags from registry while updating cache for %s", repoName), err)
@@ -309,7 +311,7 @@ func (client *Clients) UpdateCaches(repoName string) {
 }
 
 // this function compares cached values with the actual values,
-// so only update the cache after calling, not before
+// so only update the cache before returning non-error cases
 func (client *Clients) ShouldDeploy(repoName string) (bool, error) {
 	autoDeploy, err := client.PostgresClient.GetAutoDeployFlag(repoName)
 	if err != nil {
@@ -317,6 +319,7 @@ func (client *Clients) ShouldDeploy(repoName string) (bool, error) {
 		return false, err
 	}
 	if !autoDeploy {
+		client.updateCaches(repoName)
 		return false, nil
 	}
 
@@ -332,8 +335,9 @@ func (client *Clients) ShouldDeploy(repoName string) (bool, error) {
 	}
 
 	if (pinnedTag == "" && client.isNewReleaseTagAvailable(repoName)) || isDigestChanged {
+		client.updateCaches(repoName)
 		return true, nil
 	}
-
+	client.updateCaches(repoName)
 	return false, nil
 }

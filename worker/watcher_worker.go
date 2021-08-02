@@ -44,12 +44,9 @@ func (ww *WatcherWorker) initialize() {
 func (ww *WatcherWorker) runOnce() {
 	shouldDeploy, err := ww.clients.ShouldDeploy(ww.repoName)
 	if err != nil {
-		ww.clients.UpdateCaches(ww.repoName)
 		return
 	}
 	originalTag, err := ww.clients.GetFormattedPinnedTag(ww.repoName)
-	// update AFTER checking for changes
-	ww.clients.UpdateCaches(ww.repoName)
 	if err != nil || !shouldDeploy {
 		return
 	}
