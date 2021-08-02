@@ -37,10 +37,6 @@ steps:
     - GOROOT=/usr/local/go
     commands:
     - ./test.sh
-    services:
-      composition:
-        docker:
-          image: docker
     when:
       steps:
       - name: build_builder

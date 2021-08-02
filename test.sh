@@ -19,6 +19,5 @@ assert_each_go_file gofmt -l
 echo "OK"
 
 echo "-- go unit tests --"
-make snakeoil
-gotestsum -- -tags="unit integration" ./...
+gotestsum -- -tags="unit" ./...
 echo "OK"
