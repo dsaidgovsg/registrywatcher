@@ -62,7 +62,6 @@ func InitializeDockerhubApi(conf *viper.Viper) (*DockerhubApi, error) {
 
 func (api *DockerhubApi) Authenticate() (*string, error) {
 	addr := fmt.Sprintf("%s%s", api.url, "/v2/users/login")
-	log.LogAppErr("in authenticate", nil)
 	log.LogAppInfo(fmt.Sprintf("dockerhub.users.login url=%s", addr))
 
 	data := map[string]string{"username": api.username, "password": api.secret}

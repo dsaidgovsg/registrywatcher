@@ -23,7 +23,7 @@ type testEngine struct {
 	Conf         *viper.Viper
 	helper       *testutils.TestHelper
 	Clients      *Clients
-	ImageTagMap  map[string][]TagWithStatus // digest: [tag, is_current]
+	ImageTagMap  map[string][]TagWithStatus
 	Ts           *httptest.Server
 	TestRepoName string
 }
