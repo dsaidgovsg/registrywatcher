@@ -185,8 +185,13 @@ func (te *testEngine) TearDown() {
 	te.Ts.Close()
 }
 
-// named tag is what it will appear as in the docker registryDomain
-// actual tag is what the tag is based on (this is for testing purposes only)
+/*
+	For the following tests, note that the base image tags "latest" and "alpine"
+	are taken to be equivalent to image digest strings in the mock image-tag store.
+	The mock image tag store is used in turn because we are mocking the Dockerhub API server.
+	While in the real world, image digests are SHA hashes, this still allows us to test
+	the auto-deploy behaviour as we use the digest string to check if the underlying image is changed.
+*/
 func (te *testEngine) PushNewTag(namedTag, actualTag string) {
 	_, registryDomain, registryPrefix, _ := utils.ExtractRegistryInfo(te.Conf, te.TestRepoName)
 	mockImageName := utils.ConstructImageName(registryDomain, registryPrefix, te.TestRepoName, namedTag)

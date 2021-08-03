@@ -8,7 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// test ShouldDeploy for a multitude of conditions
+/*
+	Test ShouldDeploy for a multitude of conditions.
+*/
 func TestAutoDeployLatestTag(t *testing.T) {
 	te := SetUpClientTest(t)
 	defer te.TearDown()
@@ -66,7 +68,7 @@ func TestAutoDeployLatestTag(t *testing.T) {
 
 	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)
 	tagToDeploy, _ = te.Clients.GetFormattedPinnedTag(te.TestRepoName)
-	// should not deploy as the image is not changed, even though
+	// should not deploy as all tags are based on the digest "latest", even though
 	// the pinned tag is changed
 	assert.False(t, shouldDeploy)
 	assert.Equal(t, "test", tagToDeploy)
