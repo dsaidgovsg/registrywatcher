@@ -37,8 +37,8 @@ func (te *testEngine) printState() {
 	fmt.Println("cached tags", cachedTags)
 
 	pinnedTag, _ := te.Clients.GetFormattedPinnedTag(te.TestRepoName)
-	registryTagDigest, _ := te.Clients.DockerhubApi.GetTagDigestFromApi(te.TestRepoName, pinnedTag)
-	fmt.Println("registry tag digest", *registryTagDigest)
+	tagDigest, _ := te.Clients.DockerhubApi.GetTagDigestFromApi(te.TestRepoName, pinnedTag)
+	fmt.Println("registry tag digest", *tagDigest)
 
 	cachedTagDigest, _ := te.Clients.GetCachedTagDigest(te.TestRepoName)
 	fmt.Println("cached tag digest", cachedTagDigest)
@@ -70,16 +70,16 @@ func SetUpClientTest(t *testing.T) *testEngine {
 	te.containerIDs = append(te.containerIDs, regID)
 	te.containerIDs = append(te.containerIDs, pgID)
 
-	// initialize mock server
-	te.ImageTagMap = make(map[string][]string)
-
 	// initialize the clients
 	te.Clients = SetUpTestClients(t, conf)
 
 	// we use this so much might as well keep it in the struct
 	te.TestRepoName = te.Conf.GetStringSlice("watched_repositories")[0]
 
-	// set up mock Dockerhub API and imageTag store
+	// initialize mock imageTag store
+	te.ImageTagMap = make(map[string][]string)
+
+	// initialize mock Dockerhub server
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v2/users/login", func(res http.ResponseWriter, req *http.Request) {
@@ -198,7 +198,7 @@ func (te *testEngine) PushNewTag(namedTag, actualTag string) {
 	publicImageName := fmt.Sprintf("%s:%s", te.Conf.GetString("base_public_image"), actualTag)
 	err := te.helper.AddImageToRegistry(publicImageName, mockImageName)
 
-	imageDigest := testutils.RandSeq(10)
+	imageDigest := testutils.RandSeq(20)
 	te.ImageTagMap[imageDigest] = []string{namedTag, "true"}
 
 	// make is_current false for images holding the same tag
