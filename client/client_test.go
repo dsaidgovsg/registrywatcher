@@ -63,8 +63,14 @@ func TestAutoDeployLatestTag(t *testing.T) {
 	// set to "test:alpine"
 	newTag = "test"
 	te.UpdatePinnedTag(newTag)
-	te.PushNewTag(newTag, "alpine")
+	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)
+	tagToDeploy, _ = te.Clients.GetFormattedPinnedTag(te.TestRepoName)
+	// should not deploy as the image is not changed, even though
+	// the pinned tag is changed
+	assert.False(t, shouldDeploy)
+	assert.Equal(t, "test", tagToDeploy)
 
+	te.PushNewTag(newTag, "alpine")
 	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)
 	tagToDeploy, _ = te.Clients.GetFormattedPinnedTag(te.TestRepoName)
 	assert.True(t, shouldDeploy)

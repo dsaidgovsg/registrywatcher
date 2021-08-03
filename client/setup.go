@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/dsaidgovsg/registrywatcher/config"
@@ -24,7 +23,7 @@ type testEngine struct {
 	Conf         *viper.Viper
 	helper       *testutils.TestHelper
 	Clients      *Clients
-	ImageTagMap  map[string][]string // digest: [tag, is_current]
+	ImageTagMap  map[string][]TagWithStatus // digest: [tag, is_current]
 	Ts           *httptest.Server
 	TestRepoName string
 }
@@ -38,7 +37,7 @@ func (te *testEngine) printState() {
 
 	pinnedTag, _ := te.Clients.GetFormattedPinnedTag(te.TestRepoName)
 	tagDigest, _ := te.Clients.DockerhubApi.GetTagDigestFromApi(te.TestRepoName, pinnedTag)
-	fmt.Println("registry tag digest", *tagDigest)
+	fmt.Println("new tag digest", *tagDigest)
 
 	cachedTagDigest, _ := te.Clients.GetCachedTagDigest(te.TestRepoName)
 	fmt.Println("cached tag digest", cachedTagDigest)
@@ -77,7 +76,7 @@ func SetUpClientTest(t *testing.T) *testEngine {
 	te.TestRepoName = te.Conf.GetStringSlice("watched_repositories")[0]
 
 	// initialize mock imageTag store
-	te.ImageTagMap = make(map[string][]string)
+	te.ImageTagMap = make(map[string][]TagWithStatus)
 
 	// initialize mock Dockerhub server
 	router := mux.NewRouter()
@@ -94,9 +93,7 @@ func SetUpClientTest(t *testing.T) *testEngine {
 			res.Header().Set("Content-Type", "application/json")
 			res.WriteHeader(http.StatusOK)
 
-			if tag, ok := te.ImageTagMap[digest]; ok {
-				isCurrent, _ := strconv.ParseBool(tag[1])
-				tags := []TagWithStatus{{Tag: tag[0], IsCurrent: isCurrent}}
+			if tags, ok := te.ImageTagMap[digest]; ok {
 				results := CheckImageResp{Results: tags}
 				data, _ := json.Marshal(results)
 				res.Write(data)
@@ -110,9 +107,7 @@ func SetUpClientTest(t *testing.T) *testEngine {
 	router.HandleFunc("/v2/namespaces/namespace/repositories/testrepo/images",
 		func(res http.ResponseWriter, req *http.Request) {
 			var resSlice []GetTagDigestResult
-			for image, tag := range te.ImageTagMap {
-				isCurrent, _ := strconv.ParseBool(tag[1])
-				tags := []TagWithStatus{{Tag: tag[0], IsCurrent: isCurrent}}
+			for image, tags := range te.ImageTagMap {
 				resSlice = append(resSlice, GetTagDigestResult{Digest: image, Tags: tags})
 			}
 			res.Header().Set("Content-Type", "application/json")
@@ -198,13 +193,19 @@ func (te *testEngine) PushNewTag(namedTag, actualTag string) {
 	publicImageName := fmt.Sprintf("%s:%s", te.Conf.GetString("base_public_image"), actualTag)
 	err := te.helper.AddImageToRegistry(publicImageName, mockImageName)
 
-	imageDigest := testutils.RandSeq(20)
-	te.ImageTagMap[imageDigest] = []string{namedTag, "true"}
+	imageDigest := actualTag
+	if _, ok := te.ImageTagMap[imageDigest]; ok {
+		te.ImageTagMap[imageDigest] = append(te.ImageTagMap[imageDigest], TagWithStatus{namedTag, true})
+	} else {
+		te.ImageTagMap[imageDigest] = []TagWithStatus{{namedTag, true}}
+	}
 
-	// make is_current false for images holding the same tag
-	for image, tag := range te.ImageTagMap {
-		if tag[0] == namedTag && image != imageDigest {
-			tag[1] = "false"
+	// make is_current false for older images holding the same tag
+	for image, tags := range te.ImageTagMap {
+		for i, tag := range tags {
+			if tag.Tag == namedTag && image != imageDigest {
+				tags[i].IsCurrent = false
+			}
 		}
 	}
 
