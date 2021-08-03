@@ -195,10 +195,8 @@ func (api *DockerhubApi) GetTagDigestFromApi(repository string, checkTag string)
 
 	for _, item := range deserialized.Results {
 		for _, tag := range item.Tags {
-			if tag.Tag == checkTag {
-				if tag.IsCurrent {
-					return &item.Digest, nil
-				}
+			if tag.Tag == checkTag && tag.IsCurrent {
+				return &item.Digest, nil
 			}
 		}
 	}
