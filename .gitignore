@@ -1,7 +1,10 @@
 docker-registry-watcher
+registrywatcher
 *.toml
 !test.toml
 !sample.toml
+
+testutils/snakeoil
 
 # dependencies
 node_modules
