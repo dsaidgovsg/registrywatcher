@@ -60,17 +60,9 @@ func TestAutoDeployLatestTag(t *testing.T) {
 		resolves correctly for autodeployment of custom tags
 	*/
 
-	// set to "test:latest"
+	// set to "test:alpine"
 	newTag = "test"
 	te.UpdatePinnedTag(newTag)
-
-	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)
-	tagToDeploy, _ = te.Clients.GetFormattedPinnedTag(te.TestRepoName)
-	// should re-deploy after pinned tag is changed
-	assert.True(t, shouldDeploy)
-	assert.Equal(t, "test", tagToDeploy)
-
-	// "test" is now based on "alpine", rather than the original "latest"
 	te.PushNewTag(newTag, "alpine")
 
 	shouldDeploy, _ = te.Clients.ShouldDeploy(te.TestRepoName)

@@ -146,8 +146,8 @@ func (api *DockerhubApi) CheckImageIsCurrent(repository, digest string, checkTag
 	return &isCurrent, nil
 }
 
-// We can't just use the registry GetTagDigest because the digests from the
-// registry and from the dockerhub API do not match
+// Note that the digest returned from the Dockerhub API does not match
+// the digest from docker registry manifest V2 API
 func (api *DockerhubApi) GetTagDigestFromApi(repository string, checkTag string) (
 	*string, error) {
 	endpoint := fmt.Sprintf("/v2/namespaces/%s/repositories/%s/images?", api.namespace,
