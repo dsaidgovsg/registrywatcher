@@ -1,9 +1,9 @@
-FROM node:carbon as builder
+FROM node:16 as builder
 WORKDIR /workdir
 COPY ./ /workdir/
 RUN yarn install --pure-lockfile && yarn build
 
-FROM node:10-stretch-slim as deploy
+FROM node:16-stretch-slim as deploy
 WORKDIR /app
 COPY --from=builder /workdir/build ./build
 COPY --from=builder /workdir/env.js ./
