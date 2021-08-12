@@ -29,13 +29,21 @@ steps:
 
   test:
     title: Run tests
+    type: composition
     stage: test
-    image: ${{build_builder}}
     working_directory: ${{main_clone}}
     environment:
     - GOPATH=/codefresh/volume/.go
-    commands:
-    - ./test.sh
+    composition:
+      version: '2'
+    composition_candidates:
+      run-test:
+        image: ${{build_builder}}
+        command: ./test.sh
+        volumes: # Volumes required to run DIND and to mount your Repository
+          - /var/run/docker.sock:/var/run/docker.sock
+          - /var/lib/docker:/var/lib/docker
+          - ${{CF_VOLUME_NAME}}:/codefresh/volume
     when:
       steps:
       - name: build_builder
