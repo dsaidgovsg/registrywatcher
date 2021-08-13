@@ -2,12 +2,13 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Local development
 
-### Running 
+### Running
 
 Add .env.local and the other variants as per this [guide](https://facebook.github.io/create-react-app/docs/adding-custom-environment-variables)
 
 The following environment variables are used and shown below with examples:
-```
+
+```bash
 REACT_APP_SERVER_URL=http://localhost:8080
 REACT_APP_UPDATE_FREQUENCY_MILLISECONDS=1000
 ```
