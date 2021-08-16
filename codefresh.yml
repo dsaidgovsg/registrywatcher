@@ -34,7 +34,7 @@ steps:
     working_directory: ${{main_clone}}
     environment:
     - GOPATH=/codefresh/volume/.go
-    - GOPROXY="https://proxy.golang.org,direct"
+    - GOPROXY=https://proxy.golang.org,direct
     commands:
     - ./test.sh
     when:
