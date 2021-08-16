@@ -1,13 +1,9 @@
 module github.com/dsaidgovsg/registrywatcher
 
 require (
-	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200330121334-7f8b4b621b5d+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/docker/go-units v0.4.0 // indirect
-	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-gonic/gin v1.4.0
@@ -16,26 +12,21 @@ require (
 	github.com/hashicorp/nomad/api v0.0.0-20200529203653-c4416b26d3eb
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.1.0
+	github.com/lusis/go-slackbot v0.0.0-20210303200821-3c34a039d473 // indirect
 	github.com/lusis/slack-test v0.0.0-20190426140909-c40012f20018 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
-	github.com/mitchellh/hashstructure v1.0.0 // indirect
 	github.com/nlopes/slack v0.5.0
 	github.com/opencontainers/go-digest v1.0.0
-	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.7.0
-	go.uber.org/atomic v1.4.0 // indirect
-	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.10.0
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
+	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
-	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
-	golang.org/x/tools v0.1.5 // indirect
-	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
-	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
-	gotest.tools v2.2.0+incompatible // indirect
-	gotest.tools/gotestsum v1.6.4 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	gotest.tools/v3 v3.0.3 // indirect
 )
 
 replace github.com/ugorji/go v1.1.4 => github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43
