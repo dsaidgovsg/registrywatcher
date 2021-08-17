@@ -1,4 +1,4 @@
-FROM golang:1.12-alpine
+FROM golang:1.16-alpine
 
 # Only install hard dependencies
 RUN apk add --no-cache gcc git musl-dev make && \
