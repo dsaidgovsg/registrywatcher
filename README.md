@@ -137,8 +137,6 @@ The tests don't test the nomad deployment capability of the service.
 
 ## TODO
 
-A makefile to avoid having to change your local docker daemon config so as to run the tests as docker-in-docker for CI integration.
-
 An interface to swap in the deployment agent (only Nomad supported for now).
 
 Tests take too long to run, this is mainly due each integration test case spinning up and down its own docker containers.
@@ -148,5 +146,3 @@ Nomad mock server cannot run jobs, which blocks writing of integration tests inv
 Buttons should implement debouncing
 
 Bug where only new tags/SHA changes AFTER you toggle back auto deployment will trigger an update, meaning any updates during the window where auto deployment was turned off are moot.
-
-Clean up unused registry methods.
