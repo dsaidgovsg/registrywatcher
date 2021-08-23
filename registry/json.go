@@ -11,22 +11,6 @@ var (
 	ErrNoMorePages = errors.New("No more pages")
 )
 
-func (registry *Registry) getJson(url string, response interface{}) error {
-	resp, err := registry.Client.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(response)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // getPaginatedJson accepts a string and a pointer, and returns the
 // next page URL while updating pointed-to variable with a parsed JSON
 // value. When there are no more pages it returns `ErrNoMorePages`.
