@@ -131,6 +131,51 @@ func (client *NomadClient) flipJobMeta(job *nomad.Job) {
 	}
 }
 
+func (client *NomadClient) UpdateNomadJobSparkConfig(task *nomad.Task, desiredTag string) {
+	for _, template := range task.Templates {
+		if *template.SourcePath == "alloc/spark-defaults.conf" {
+			data := template.EmbeddedTmpl
+			rows := strings.Split(*data, "/n")
+			var newRows []string
+			var words []string
+
+			sparkExecutorImage := ""
+			sparkDriverImage := ""
+			sparkExecutorVarName := "spark.kubernetes.executor.container.image"
+			sparkDriverVarName := "spark.kubernetes.driver.container.image"
+
+			for _, row := range rows {
+				// obtain the sparkExecutorImage from the original config where the line is
+				// of the format
+				// spark.kubernetes.executor.container.image    ${spark_executor_image}:${docker_tag}
+				if strings.Contains(row, sparkExecutorVarName) {
+					words = strings.Fields(row)
+					sparkExecutorImage = strings.Split(words[1], ":")[0]
+
+				} else if strings.Contains(row, sparkDriverVarName) {
+					words = strings.Fields(row)
+					sparkDriverImage = strings.Split(words[1], ":")[0]
+
+				} else {
+					newRows = append(newRows, row)
+				}
+			}
+
+			if sparkExecutorImage != "" {
+				newExecutorRow := fmt.Sprintf("%s				%s:%s", sparkExecutorVarName, sparkExecutorImage, desiredTag)
+				newRows = append(newRows, newExecutorRow)
+			}
+			if sparkDriverImage != "" {
+				newDriverRow := fmt.Sprintf("%s				%s:%s", sparkDriverVarName, sparkDriverImage, desiredTag)
+				newRows = append(newRows, newDriverRow)
+			}
+
+			newData := strings.Join(newRows[:], "\n")
+			template.EmbeddedTmpl = &newData
+		}
+	}
+}
+
 // There is no way to restart a job through the API currently
 // https://github.com/hashicorp/nomad/issues/698
 func (client *NomadClient) RestartNomadJob(job *nomad.Job, desiredTag string) {
