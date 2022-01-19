@@ -71,9 +71,9 @@ func (client *NomadClient) GetNomadJobTag(jobID, imageName string) (string, erro
 // Updates one image in a Nomad job, unless the Nomad jobspec is registrywatcher itself.
 // Since the registrywatcher Nomad jobspec contains 2 images (UI and backend), it will update
 // both images before it restarts itself.
-func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, taskName, desiredTag string) {
-	_, registryDomain, registryPrefix, _ := utils.ExtractRegistryInfo(client.conf, imageName)
-	desiredFullImageName := utils.ConstructImageName(registryDomain, registryPrefix, imageName, desiredTag)
+func (client *NomadClient) UpdateNomadJobTag(jobID, repoName, taskName, desiredTag string) {
+	_, registryDomain, registryPrefix, _ := utils.ExtractRegistryInfo(client.conf, repoName)
+	desiredFullImageName := utils.ConstructImageName(registryDomain, registryPrefix, repoName, desiredTag)
 	matchFound := false
 	log.LogAppInfo(fmt.Sprintf("Full image name to deploy %s", desiredFullImageName))
 	job, err := client.getNomadJob(jobID)
@@ -81,16 +81,16 @@ func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, taskName, desired
 		log.LogAppErr(fmt.Sprintf("Couldn't find jobID %s", jobID), err)
 		return
 	}
-	for i, taskGroup := range job.TaskGroups {
-		for j, task := range taskGroup.Tasks {
+	for _, taskGroup := range job.TaskGroups {
+		for _, task := range taskGroup.Tasks {
 			if task.Name == taskName {
 				matchFound = true
 				// to avoid unexpected issues we use the prefix from config
 				// its possible that what is deployed may be from a different registry
-				job.TaskGroups[i].Tasks[j].Config["image"] = desiredFullImageName
+				task.Config["image"] = desiredFullImageName
 				// nomad jobs with this config set to false may end up
 				// with this config as true in the process of calling this endpoint
-				job.TaskGroups[i].Tasks[j].Config["force_pull"] = true
+				task.Config["force_pull"] = true
 			}
 			// bootstrapping. the nomad job "registrywatcher" also contains
 			// a task/container of the ui image.
@@ -98,9 +98,11 @@ func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, taskName, desired
 				matchFound = true
 				uiFullImageName := utils.ConstructImageName(
 					registryDomain, registryPrefix, "registrywatcher-ui", desiredTag)
-				job.TaskGroups[i].Tasks[j].Config["image"] = uiFullImageName
-				job.TaskGroups[i].Tasks[j].Config["force_pull"] = true
+				task.Config["image"] = uiFullImageName
+				task.Config["force_pull"] = true
 			}
+
+			client.updateNomadJobSparkConfig(task, desiredTag)
 		}
 	}
 
@@ -110,7 +112,7 @@ func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, taskName, desired
 	}
 
 	if matchFound {
-		go client.RestartNomadJob(&job, desiredTag)
+		go client.restartNomadJob(&job, desiredTag)
 	} else {
 		utils.PostSlackError(client.conf, fmt.Sprintf("Mapped task name %s not found in Nomad job %s. Please check deployment configuration.", taskName, *job.ID))
 	}
@@ -131,7 +133,7 @@ func (client *NomadClient) flipJobMeta(job *nomad.Job) {
 	}
 }
 
-func (client *NomadClient) UpdateNomadJobSparkConfig(task *nomad.Task, desiredTag string) {
+func (client *NomadClient) updateNomadJobSparkConfig(task *nomad.Task, desiredTag string) {
 	for _, template := range task.Templates {
 		if *template.SourcePath == "alloc/spark-defaults.conf" {
 			data := template.EmbeddedTmpl
@@ -139,37 +141,37 @@ func (client *NomadClient) UpdateNomadJobSparkConfig(task *nomad.Task, desiredTa
 			var newRows []string
 			var words []string
 
-			sparkExecutorImage := ""
-			sparkDriverImage := ""
+			sparkImageName := ""
 			sparkExecutorVarName := "spark.kubernetes.executor.container.image"
 			sparkDriverVarName := "spark.kubernetes.driver.container.image"
+			sparkVarName := "spark.kubernetes.container.image"
 
 			for _, row := range rows {
-				// obtain the sparkExecutorImage from the original config where the line is
-				// of the format
+				// build the config line with the desired Docker tag
+				// where original config line is of the format
 				// spark.kubernetes.executor.container.image    ${spark_executor_image}:${docker_tag}
 				if strings.Contains(row, sparkExecutorVarName) {
 					words = strings.Fields(row)
-					sparkExecutorImage = strings.Split(words[1], ":")[0]
+					sparkImageName = strings.Split(words[1], ":")[0]
+					newExecutorRow := fmt.Sprintf("%s				%s:%s", sparkExecutorVarName, sparkImageName, desiredTag)
+					newRows = append(newRows, newExecutorRow)
 
 				} else if strings.Contains(row, sparkDriverVarName) {
 					words = strings.Fields(row)
-					sparkDriverImage = strings.Split(words[1], ":")[0]
+					sparkImageName = strings.Split(words[1], ":")[0]
+					newExecutorRow := fmt.Sprintf("%s				%s:%s", sparkDriverVarName, sparkImageName, desiredTag)
+					newRows = append(newRows, newExecutorRow)
+
+				} else if strings.Contains(row, sparkVarName) {
+					words = strings.Fields(row)
+					sparkImageName = strings.Split(words[1], ":")[0]
+					newExecutorRow := fmt.Sprintf("%s				%s:%s", sparkVarName, sparkImageName, desiredTag)
+					newRows = append(newRows, newExecutorRow)
 
 				} else {
 					newRows = append(newRows, row)
 				}
 			}
-
-			if sparkExecutorImage != "" {
-				newExecutorRow := fmt.Sprintf("%s				%s:%s", sparkExecutorVarName, sparkExecutorImage, desiredTag)
-				newRows = append(newRows, newExecutorRow)
-			}
-			if sparkDriverImage != "" {
-				newDriverRow := fmt.Sprintf("%s				%s:%s", sparkDriverVarName, sparkDriverImage, desiredTag)
-				newRows = append(newRows, newDriverRow)
-			}
-
 			newData := strings.Join(newRows[:], "\n")
 			template.EmbeddedTmpl = &newData
 		}
@@ -178,7 +180,7 @@ func (client *NomadClient) UpdateNomadJobSparkConfig(task *nomad.Task, desiredTa
 
 // There is no way to restart a job through the API currently
 // https://github.com/hashicorp/nomad/issues/698
-func (client *NomadClient) RestartNomadJob(job *nomad.Job, desiredTag string) {
+func (client *NomadClient) restartNomadJob(job *nomad.Job, desiredTag string) {
 	jobID := *job.ID
 
 	// stupid hack to force a restart when registering a job
@@ -190,13 +192,13 @@ func (client *NomadClient) RestartNomadJob(job *nomad.Job, desiredTag string) {
 		log.LogAppErr(fmt.Sprintf("Failed to restart job %s", jobID), err)
 		utils.PostSlackError(client.conf, fmt.Sprintf("Error: failed to force redeploy job `%s` for tag `%s`", jobID, desiredTag))
 	} else {
-		client.MonitorNomadJob(resp.EvalID, jobID, desiredTag)
+		client.monitorNomadJob(resp.EvalID, jobID, desiredTag)
 	}
 }
 
 // Monitor the progress of a Nomad job deployment
 // and posts a slack update on the outcome
-func (client *NomadClient) MonitorNomadJob(evalID, jobID, desiredTag string) {
+func (client *NomadClient) monitorNomadJob(evalID, jobID, desiredTag string) {
 	evalStatusDesc := ""
 	deploymentStatus := "running"
 	evalDeploymentID := ""
