@@ -83,6 +83,10 @@ func (client *NomadClient) UpdateNomadJobTag(jobID, repoName, taskName, desiredT
 	}
 	for _, taskGroup := range job.TaskGroups {
 		for _, task := range taskGroup.Tasks {
+			// get original image tag
+			originalFullImage := task.Config["image"].(string)
+			originalTag := strings.Split(originalFullImage, ":")[1]
+
 			if task.Name == taskName {
 				matchFound = true
 				// to avoid unexpected issues we use the prefix from config
@@ -101,8 +105,7 @@ func (client *NomadClient) UpdateNomadJobTag(jobID, repoName, taskName, desiredT
 				task.Config["image"] = uiFullImageName
 				task.Config["force_pull"] = true
 			}
-
-			client.updateNomadJobSparkConfig(task, desiredTag)
+			client.updateNomadJobSparkConfig(task, desiredTag, originalTag)
 		}
 	}
 
@@ -133,15 +136,13 @@ func (client *NomadClient) flipJobMeta(job *nomad.Job) {
 	}
 }
 
-func (client *NomadClient) updateNomadJobSparkConfig(task *nomad.Task, desiredTag string) {
+func (client *NomadClient) updateNomadJobSparkConfig(task *nomad.Task, desiredTag string, originalTag string) {
 	for _, template := range task.Templates {
 		if *template.SourcePath == "alloc/spark-defaults.conf" {
 			data := template.EmbeddedTmpl
 			rows := strings.Split(*data, "/n")
 			var newRows []string
-			var words []string
 
-			sparkImageName := ""
 			sparkExecutorVarName := "spark.kubernetes.executor.container.image"
 			sparkDriverVarName := "spark.kubernetes.driver.container.image"
 			sparkVarName := "spark.kubernetes.container.image"
@@ -150,23 +151,12 @@ func (client *NomadClient) updateNomadJobSparkConfig(task *nomad.Task, desiredTa
 				// build the config line with the desired Docker tag
 				// where original config line is of the format
 				// spark.kubernetes.executor.container.image    ${spark_executor_image}:${docker_tag}
-				if strings.Contains(row, sparkExecutorVarName) {
-					words = strings.Fields(row)
-					sparkImageName = strings.Split(words[1], ":")[0]
-					newExecutorRow := fmt.Sprintf("%s				%s:%s", sparkExecutorVarName, sparkImageName, desiredTag)
-					newRows = append(newRows, newExecutorRow)
-
-				} else if strings.Contains(row, sparkDriverVarName) {
-					words = strings.Fields(row)
-					sparkImageName = strings.Split(words[1], ":")[0]
-					newExecutorRow := fmt.Sprintf("%s				%s:%s", sparkDriverVarName, sparkImageName, desiredTag)
-					newRows = append(newRows, newExecutorRow)
-
-				} else if strings.Contains(row, sparkVarName) {
-					words = strings.Fields(row)
-					sparkImageName = strings.Split(words[1], ":")[0]
-					newExecutorRow := fmt.Sprintf("%s				%s:%s", sparkVarName, sparkImageName, desiredTag)
-					newRows = append(newRows, newExecutorRow)
+				if strings.Contains(row, originalTag) &&
+					(strings.Contains(row, sparkExecutorVarName) ||
+						strings.Contains(row, sparkDriverVarName) ||
+						strings.Contains(row, sparkVarName)) {
+					newRow := strings.Replace(row, originalTag, desiredTag, 1)
+					newRows = append(newRows, newRow)
 
 				} else {
 					newRows = append(newRows, row)
