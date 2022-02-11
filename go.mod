@@ -1,7 +1,7 @@
 module github.com/dsaidgovsg/registrywatcher
 
 require (
-	github.com/docker/distribution v2.7.1+incompatible
+	github.com/docker/distribution v2.8.0+incompatible // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200330121334-7f8b4b621b5d+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/fatih/color v1.12.0 // indirect
@@ -16,7 +16,6 @@ require (
 	github.com/lusis/slack-test v0.0.0-20190426140909-c40012f20018 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/nlopes/slack v0.5.0
-	github.com/opencontainers/go-digest v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.7.0
