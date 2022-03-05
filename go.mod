@@ -4,7 +4,7 @@ require (
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200330121334-7f8b4b621b5d+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/gin-contrib/cors v1.3.0
-	github.com/gin-gonic/gin v1.4.0
+	github.com/gin-gonic/gin v1.7.7
 	github.com/gorilla/mux v1.7.4
 	github.com/hashicorp/nomad v1.1.3
 	github.com/hashicorp/nomad/api v0.0.0-20200529203653-c4416b26d3eb
@@ -16,7 +16,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
-	github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8 // indirect
 	go.uber.org/zap v1.17.0
 	gotest.tools/v3 v3.0.3 // indirect
 )
