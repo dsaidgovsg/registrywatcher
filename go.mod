@@ -8,8 +8,8 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/nomad v1.1.3
 	github.com/hashicorp/nomad/api v0.0.0-20200529203653-c4416b26d3eb
-	github.com/jmoiron/sqlx v1.2.0
-	github.com/lib/pq v1.1.0
+	github.com/jmoiron/sqlx v1.3.4
+	github.com/lib/pq v1.2.0
 	github.com/lusis/go-slackbot v0.0.0-20210303200821-3c34a039d473 // indirect
 	github.com/lusis/slack-test v0.0.0-20190426140909-c40012f20018 // indirect
 	github.com/nlopes/slack v0.5.0
