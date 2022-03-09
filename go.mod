@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-test/deep v1.0.4 // indirect
 	github.com/gorilla/mux v1.8.0
-	github.com/hashicorp/nomad v1.1.3
+	github.com/hashicorp/nomad v1.1.12
 	github.com/hashicorp/nomad/api v0.0.0-20200529203653-c4416b26d3eb
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.4
