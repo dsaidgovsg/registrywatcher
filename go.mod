@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/nomad v1.2.6
 	github.com/hashicorp/nomad/api v0.0.0-20200529203653-c4416b26d3eb
 	github.com/jmoiron/sqlx v1.3.4
-	github.com/lib/pq v1.10.4
+	github.com/lib/pq v1.10.5
 	github.com/nlopes/slack v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.10.1
