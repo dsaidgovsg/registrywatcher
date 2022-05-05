@@ -9,13 +9,13 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/nomad v1.2.6
 	github.com/hashicorp/nomad/api v0.0.0-20200529203653-c4416b26d3eb
-	github.com/jmoiron/sqlx v1.3.4
-	github.com/lib/pq v1.10.4
-	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
+	github.com/jmoiron/sqlx v1.3.5
+	github.com/lib/pq v1.10.5
+  github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/nlopes/slack v0.6.0
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/viper v1.10.1
-	github.com/stretchr/testify v1.7.0
+	github.com/spf13/viper v1.11.0
+	github.com/stretchr/testify v1.7.1
 	go.uber.org/zap v1.21.0
 	gotest.tools/v3 v3.0.3 // indirect
 )
