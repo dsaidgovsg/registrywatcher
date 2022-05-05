@@ -1,7 +1,7 @@
 module github.com/dsaidgovsg/registrywatcher
 
 require (
-	github.com/docker/docker v17.12.0-ce-rc1.0.20200330121334-7f8b4b621b5d+incompatible
+	github.com/docker/docker v20.10.14+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.7
@@ -11,6 +11,7 @@ require (
 	github.com/hashicorp/nomad/api v0.0.0-20200529203653-c4416b26d3eb
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.4
+	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/nlopes/slack v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.10.1

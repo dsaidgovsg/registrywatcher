@@ -86,7 +86,7 @@ func (helper *TestHelper) StartPostgres() (string, error) {
 				Name: "always",
 			},
 		},
-		nil, "")
+		nil, nil, "")
 	if err != nil {
 		return "", err
 	}
@@ -151,7 +151,7 @@ func (helper *TestHelper) StartRegistry() (string, string, error) {
 				Name: "always",
 			},
 		},
-		nil, "")
+		nil, nil, "")
 	if err != nil {
 		return "", "", err
 	}
