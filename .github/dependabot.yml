@@ -8,7 +8,7 @@ updates:
       separator: "-"
 
   - package-ecosystem: "npm"
-    directory: "ui/"
+    directory: "/"
     schedule:
       interval: "daily"
     pull-request-branch-name:
