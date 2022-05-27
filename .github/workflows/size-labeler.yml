@@ -1,5 +1,11 @@
 name: PR Size Labeler
 on: pull_request
+permissions:
+  # All other permissions are set to none
+  # Adding permissions are needed to allow dependabot PRs to use size labeler
+  checks: write
+  contents: read
+  pull-requests: write
 
 jobs:
   size-label:
