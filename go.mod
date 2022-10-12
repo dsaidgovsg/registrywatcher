@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-test/deep v1.0.4 // indirect
 	github.com/gorilla/mux v1.8.0
-	github.com/hashicorp/nomad v1.2.6
+	github.com/hashicorp/nomad v1.2.13
 	github.com/hashicorp/nomad/api v0.0.0-20200529203653-c4416b26d3eb
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.7
@@ -17,6 +17,7 @@ require (
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.21.0
+	google.golang.org/genproto v0.0.0-20220926220553-6981cbe3cfce // indirect
 	gotest.tools/v3 v3.0.3 // indirect
 )
 
