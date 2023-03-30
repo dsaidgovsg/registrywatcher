@@ -4,27 +4,26 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Button from '@material-ui/core/Button';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import TextField from '@material-ui/core/TextField';
 
 class Repository extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedTag: this.props.repo.pinned_tag_value,
-            inputValue: this.props.repo.pinned_tag_value
+            selectedTag: this.props.repo.pinned_tag_value
         };
+    }
+
+    handleChange = (event) => {
+        this.setState({selectedTag: event.target.value});
     }
 
     render() {
         const showRedeployButton = this.state.selectedTag === this.props.repo.pinned_tag_value;
-        const inputValue = this.state.inputValue
-        
         let button;
 
         if (showRedeployButton) {
@@ -56,23 +55,6 @@ class Repository extends Component {
                             {this.props.repo.pinned_tag === "" ? `Latest version: ${this.props.repo.pinned_tag_value}` : this.props.repo.pinned_tag}
                         </Typography>
                     </CardContent>
-                </div>
-                <div>{`value: ${this.state.selectedTag !== null ? `'${this.state.selectedTag}'` : 'null'}`}</div>
-                <div>{`inputValue: '${inputValue}'`}</div>
-                <div>
-                    <Autocomplete
-                        value={this.state.selectedTag}
-                        onChange={(event, newValue) => {
-                            this.setState({ selectedTag: newValue });
-                          }}
-                        inputValue={inputValue}
-                        onInputChange={(event, newInputValue) => {
-                            this.setState({ inputValue: newInputValue });
-                        }}
-                        options={this.props.repo.tags}
-                        id="tags"
-                        renderInput={(params) => <TextField {...params} label="Controllable" variant="outlined" />}
-                    />
                 </div>
                 <div>
                     <FormControl>
