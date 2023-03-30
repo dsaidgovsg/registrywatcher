@@ -162,7 +162,7 @@ class SearchBar extends React.Component {
             <div className="root">
                 <Select
                     TextFieldProps={{
-                        label: 'Services',
+                        label: 'Label',
                         InputLabelProps: {
                             shrink: true,
                         },

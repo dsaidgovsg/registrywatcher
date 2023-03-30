@@ -208,7 +208,7 @@ class App extends Component {
 
     render() {
         if (this.state.loading) {
-            return <h2>Loading....</h2>;
+            return <h2>Loading...</h2>;
         }
 
         const { classes } = this.props;
