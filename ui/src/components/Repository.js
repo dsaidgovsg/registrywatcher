@@ -85,7 +85,7 @@ class Repository extends Component {
                             options={this.props.repo.tags}
                             style={{ width: 300 }}
                             renderInput={(params) => (
-                                <TextField {...params}/>
+                                <TextField {...params} inputProps={{style: { textAlign: 'center' }}}/>
                             )}
                         />
                     </FormControl>
