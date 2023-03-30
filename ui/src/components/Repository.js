@@ -89,7 +89,8 @@ class Repository extends Component {
                             onInputChange={(event, newInputValue)=> {
                                 if (newInputValue == '') {
                                     this.setState({
-                                        inputTag: this.props.repo.pinned_tag_value
+                                        inputTag: this.props.repo.pinned_tag_value,
+                                        selectedTag: this.props.repo.pinned_tag_value
                                     })
                                 } else {
                                     this.setState({
