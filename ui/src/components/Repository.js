@@ -16,19 +16,19 @@ class Repository extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedTag: this.props.repo.pinned_tag_value
+            selectedTag: this.props.repo.pinned_tag_value,
+            inputValue: this.props.repo.pinned_tag_value
         };
     }
 
     handleChange = (event) => {
         this.setState({selectedTag: event.target.value});
     }
-    handleInputChange = (event) => {
-        this.setState(setInputValue(event.inputValue))
-    }
 
     render() {
         const showRedeployButton = this.state.selectedTag === this.props.repo.pinned_tag_value;
+        const inputValue = this.state.inputValue
+        
         let button;
 
         if (showRedeployButton) {
@@ -61,12 +61,16 @@ class Repository extends Component {
                         </Typography>
                     </CardContent>
                 </div>
+                <div>{`value: ${this.state.selectedTag !== null ? `'${this.state.selectedTag}'` : 'null'}`}</div>
+                <div>{`inputValue: '${inputValue}'`}</div>
                 <div>
                     <Autocomplete
                         value={this.state.selectedTag}
                         onChange={this.handleChange}
-                        inputValue={this.props.repo.pinned_tag_value}
-                        onInputChange={this.handleInputChange}
+                        inputValue={inputValue}
+                        onInputChange={(event, newInputValue) => {
+                            this.setState({ inputValue: newInputValue });
+                        }}
                         options={this.props.repo.tags}
                         id="tags"
                         renderInput={(params) => <TextField {...params} label="Controllable" variant="outlined" />}
