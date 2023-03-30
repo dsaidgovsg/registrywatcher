@@ -25,17 +25,6 @@ class Repository extends Component {
         this.setState({selectedTag: event.target.value});
     }
 
-    handleInputChange = (event) => {
-        if (event.target.value === '') {
-            this.setState({
-                selectedTag: this.props.repo.pinned_tag_value,
-                inputTag: this.props.repo.pinned_tag_value
-            })
-        } else {
-            this.setState({inputTag: event.target.value})
-        }
-    }
-
     render() {
         const showRedeployButton = this.state.selectedTag === this.props.repo.pinned_tag_value;
         let button;
@@ -95,7 +84,16 @@ class Repository extends Component {
                             value={this.state.selectedTag}
                             onChange={this.handleChange}
                             inputValue={this.state.inputTag}
-                            onInputChange={this.handleInputChange}
+                            onInputChange={(event, newInputValue)=> {
+                                if (newInputValue === '') {
+                                    this.setState({
+                                        selectedTag: this.props.repo.pinned_tag_value,
+                                        inputTag: this.props.repo.pinned_tag_value
+                                    })
+                                } else {
+                                    this.setState({inputTag: newInputValue})
+                                }
+                            }}
                             id="controlled-tags"
                             options={this.props.repo.tags}
                             style={{ width: 300 }}
