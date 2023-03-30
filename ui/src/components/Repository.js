@@ -9,17 +9,31 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Button from '@material-ui/core/Button';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import TextField from '@material-ui/core/TextField';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 class Repository extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedTag: this.props.repo.pinned_tag_value
+            selectedTag: this.props.repo.pinned_tag_value,
+            inputTag: this.props.repo.pinned_tag_value
         };
     }
 
     handleChange = (event) => {
         this.setState({selectedTag: event.target.value});
+    }
+
+    handleInputChange = (event) => {
+        if (event.target.value === '') {
+            this.setState({
+                selectedTag: this.props.repo.pinned_tag_value,
+                inputTag: this.props.repo.pinned_tag_value
+            })
+        } else {
+            this.setState({inputTag: event.target.value})
+        }
     }
 
     render() {
@@ -56,6 +70,8 @@ class Repository extends Component {
                         </Typography>
                     </CardContent>
                 </div>
+                <div>{`inputTag: '${this.state.inputTag}'`}</div>
+                <div>{`selectedTag: '${this.state.selectedTag}'`}</div>
                 <div>
                     <FormControl>
                         <InputLabel htmlFor="age-simple">Tags</InputLabel>
@@ -75,6 +91,18 @@ class Repository extends Component {
                                 }
                             })}
                         </Select>
+                        <Autocomplete
+                            value={this.state.selectedTag}
+                            onChange={this.handleChange}
+                            inputValue={this.state.inputTag}
+                            onInputChange={this.handleInputChange}
+                            id="controlled-tags"
+                            options={this.state.props.repo.tags}
+                            style={{ width: 300 }}
+                            renderInput={(params) => (
+                                <TextField {...params} label="Tags" variant="outlined" />
+                            )}
+                        />
                     </FormControl>
                 </div>
                 <div>
