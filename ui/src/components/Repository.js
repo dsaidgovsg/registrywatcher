@@ -85,14 +85,7 @@ class Repository extends Component {
                             onChange={this.handleChange}
                             inputValue={this.state.inputTag}
                             onInputChange={(event, newInputValue)=> {
-                                if (newInputValue === '') {
-                                    this.setState({
-                                        selectedTag: this.props.repo.pinned_tag_value,
-                                        inputTag: this.props.repo.pinned_tag_value
-                                    })
-                                } else {
-                                    this.setState({inputTag: newInputValue})
-                                }
+                                this.setState({inputTag: newInputValue})
                             }}
                             id="controlled-tags"
                             options={this.props.repo.tags}
