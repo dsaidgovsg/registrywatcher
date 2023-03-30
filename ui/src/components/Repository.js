@@ -82,12 +82,13 @@ class Repository extends Component {
                         </Select>
                         <Autocomplete
                             value={this.state.selectedTag}
-                            onChange={this.handleChange}
+                            onChange={(event, newValue) => {
+                                this.setState({selectedTag: newValue})
+                            }}
                             inputValue={this.state.inputTag}
                             onInputChange={(event, newInputValue)=> {
                                 this.setState({
                                     inputTag: newInputValue,
-                                    selectedTag: newInputValue
                                 })
                             }}
                             id="controlled-tags"
