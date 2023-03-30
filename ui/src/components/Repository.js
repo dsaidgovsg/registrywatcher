@@ -103,7 +103,7 @@ class Repository extends Component {
                             options={this.props.repo.tags}
                             style={{ width: 300 }}
                             renderInput={(params) => (
-                                <TextField {...params} label="Tags" variant="standard-basic" />
+                                <TextField {...params} label="Tags"/>
                             )}
                         />
                     </FormControl>
