@@ -86,7 +86,6 @@ class Repository extends Component {
                                 this.setState({selectedTag: newValue})
                             }}
                             inputValue={this.state.inputTag}
-                            defaultValue={this.props.repo.pinned_tag_value}
                             onInputChange={(event, newInputValue)=> {
                                 if (newInputValue == '') {
                                     this.setState({
