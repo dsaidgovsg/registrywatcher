@@ -58,7 +58,7 @@ class Repository extends Component {
                 </div>
                 <div>
                     <FormControl>
-                        <InputLabel htmlFor="age-simple">Tag</InputLabel>
+                        <InputLabel htmlFor="age-simple">Tags</InputLabel>
                         <Select
                             value={this.state.selectedTag}
                             onChange={this.handleChange}
