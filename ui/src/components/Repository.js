@@ -90,12 +90,14 @@ class Repository extends Component {
                                 if (newInputValue == '') {
                                     this.setState({
                                         inputTag: this.props.repo.pinned_tag_value,
+                                        selectedTag: this.props.repo.pinned_tag_value
                                     })
                                 } else {
                                     this.setState({
                                         inputTag: newInputValue,
                                     })
                                 }
+                                
                             }}
                             id="controlled-tags"
                             options={this.props.repo.tags}
