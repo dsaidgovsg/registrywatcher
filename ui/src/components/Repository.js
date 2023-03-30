@@ -4,6 +4,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
+import AutoComplete from '@material-ui/core/AutoComplete';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -20,6 +21,9 @@ class Repository extends Component {
 
     handleChange = (event) => {
         this.setState({selectedTag: event.target.value});
+    }
+    handleInputChange = (event) => {
+        this.setState(setInputValue(event.inputValue))
     }
 
     render() {
@@ -55,6 +59,15 @@ class Repository extends Component {
                             {this.props.repo.pinned_tag === "" ? `Latest version: ${this.props.repo.pinned_tag_value}` : this.props.repo.pinned_tag}
                         </Typography>
                     </CardContent>
+                </div>
+                <div>
+                    <AutoComplete
+                        value={this.state.selectedTag}
+                        onChange={this.handleChange}
+                        inputValue={this.props.repo.pinned_tag_value}
+                        onInputChange={this.handleInputChange}
+                        options={this.props.repo.tags}
+                    />
                 </div>
                 <div>
                     <FormControl>
