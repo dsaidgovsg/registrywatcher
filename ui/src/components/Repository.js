@@ -61,7 +61,6 @@ class Repository extends Component {
                 </div>
                 <div>
                     <FormControl>
-                        <InputLabel htmlFor="age-simple">Tags</InputLabel>
                         <Autocomplete
                             value={this.state.selectedTag}
                             onChange={(event, newValue) => {
@@ -85,7 +84,7 @@ class Repository extends Component {
                             options={this.props.repo.tags}
                             style={{ width: 300 }}
                             renderInput={(params) => (
-                                <TextField {...params} inputProps={{style: { textAlign: 'center' }}}/>
+                                <TextField {...params} label="Tags" inputProps={{style: { textAlign: 'center' }}} />
                             )}
                         />
                     </FormControl>
