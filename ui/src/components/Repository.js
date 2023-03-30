@@ -97,7 +97,7 @@ class Repository extends Component {
                             inputValue={this.state.inputTag}
                             onInputChange={this.handleInputChange}
                             id="controlled-tags"
-                            options={this.state.props.repo.tags}
+                            options={this.props.repo.tags}
                             style={{ width: 300 }}
                             renderInput={(params) => (
                                 <TextField {...params} label="Tags" variant="outlined" />
