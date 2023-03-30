@@ -4,7 +4,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
-import AutoComplete from '@material-ui/core/AutoComplete';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -61,12 +61,14 @@ class Repository extends Component {
                     </CardContent>
                 </div>
                 <div>
-                    <AutoComplete
+                    <Autocomplete
                         value={this.state.selectedTag}
                         onChange={this.handleChange}
                         inputValue={this.props.repo.pinned_tag_value}
                         onInputChange={this.handleInputChange}
                         options={this.props.repo.tags}
+                        id="tags"
+                        renderInput={(params) => <TextField {...params} label="Controllable" variant="outlined" />}
                     />
                 </div>
                 <div>
