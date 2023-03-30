@@ -94,7 +94,7 @@ func (client *NomadClient) UpdateNomadJobTag(jobID, imageName, taskName, desired
 			}
 			// bootstrapping. the nomad job "registrywatcher" also contains
 			// a task/container of the ui image.
-			if taskName == "registrywatcher" {
+			if taskName == "registrywatcher-ui" {
 				matchFound = true
 				uiFullImageName := utils.ConstructImageName(
 					registryDomain, registryPrefix, "registrywatcher-ui", desiredTag)
