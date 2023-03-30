@@ -59,27 +59,9 @@ class Repository extends Component {
                         </Typography>
                     </CardContent>
                 </div>
-                <div>{`inputTag: '${this.state.inputTag}'`}</div>
-                <div>{`selectedTag: '${this.state.selectedTag}'`}</div>
                 <div>
                     <FormControl>
                         <InputLabel htmlFor="age-simple">Tags</InputLabel>
-                        <Select
-                            value={this.state.selectedTag}
-                            onChange={this.handleChange}
-                            inputProps={{
-                                name: 'age',
-                                id: 'age-simple',
-                            }}
-                        >
-                            {this.props.repo.tags.map(tag => {
-                                if (tag === this.props.repo.pinned_tag_value) {
-                                    return <MenuItem key={this.props.repo + tag} value={tag}>{tag}</MenuItem>;
-                                } else {
-                                    return <MenuItem key={this.props.repo + tag} value={tag}>{tag}</MenuItem>;
-                                }
-                            })}
-                        </Select>
                         <Autocomplete
                             value={this.state.selectedTag}
                             onChange={(event, newValue) => {
