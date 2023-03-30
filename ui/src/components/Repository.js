@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
-import Autocomplete from '@material-ui/core/Autocomplete';
+import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -58,8 +58,8 @@ class Repository extends Component {
                 </div>
                 <div>
                     <FormControl>
-                        <InputLabel htmlFor="age-simple">Tags</InputLabel>
-                        <Autocomplete
+                        <InputLabel htmlFor="age-simple">Tag</InputLabel>
+                        <Select
                             value={this.state.selectedTag}
                             onChange={this.handleChange}
                             inputProps={{
@@ -74,7 +74,7 @@ class Repository extends Component {
                                     return <MenuItem key={this.props.repo + tag} value={tag}>{tag}</MenuItem>;
                                 }
                             })}
-                        </Autocomplete>
+                        </Select>
                     </FormControl>
                 </div>
                 <div>
