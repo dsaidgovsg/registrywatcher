@@ -21,10 +21,6 @@ class Repository extends Component {
         };
     }
 
-    handleChange = (event) => {
-        this.setState({selectedTag: event.target.value});
-    }
-
     render() {
         const showRedeployButton = this.state.selectedTag === this.props.repo.pinned_tag_value;
         const inputValue = this.state.inputValue
@@ -66,7 +62,9 @@ class Repository extends Component {
                 <div>
                     <Autocomplete
                         value={this.state.selectedTag}
-                        onChange={this.handleChange}
+                        onChange={(event, newValue) => {
+                            this.setState({ selectedTag: newValue });
+                          }}
                         inputValue={inputValue}
                         onInputChange={(event, newInputValue) => {
                             this.setState({ inputValue: newInputValue });
