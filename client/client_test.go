@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package client
@@ -9,7 +10,7 @@ import (
 )
 
 /*
-	Test ShouldDeploy for a multitude of conditions.
+Test ShouldDeploy for a multitude of conditions.
 */
 func TestAutoDeployLatestTag(t *testing.T) {
 	te := SetUpClientTest(t)
