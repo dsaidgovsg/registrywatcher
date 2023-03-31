@@ -22,7 +22,7 @@ class Repository extends Component {
     }
 
     handleChange = (event) => {
-        this.setState({selectedTag: event.target.value});
+        this.setState({ selectedTag: event.target.value });
     }
 
     render() {
@@ -31,20 +31,20 @@ class Repository extends Component {
 
         if (showRedeployButton) {
             button = <Button variant="contained"
-                             color="default"
-                             onClick={() => this.props.postDeploy(
-                                 this.state.selectedTag, this.props.name)}>
+                color="default"
+                onClick={() => this.props.postDeploy(
+                    this.state.selectedTag, this.props.name)}>
                 Redeploy {this.state.selectedTag}
                 <CloudUploadIcon />
-                     </Button>;
+            </Button>;
         } else {
             button = <Button variant="contained"
-                             color="default"
-                             onClick={() => this.props.postDeploy(
-                                 this.state.selectedTag, this.props.name)}>
+                color="default"
+                onClick={() => this.props.postDeploy(
+                    this.state.selectedTag, this.props.name)}>
                 Deploy {this.state.selectedTag}
                 <CloudUploadIcon />
-                     </Button>;
+            </Button>;
         }
 
         return (
@@ -64,42 +64,36 @@ class Repository extends Component {
                         <Autocomplete
                             value={this.state.selectedTag}
                             onChange={(event, newValue) => {
-                                this.setState({selectedTag: newValue})
+                                this.setState({ selectedTag: newValue })
                             }}
                             inputValue={this.state.inputTag}
-                            onInputChange={(event, newInputValue)=> {
-                                if (newInputValue == '') {
-                                    this.setState({
-                                        inputTag: this.props.repo.pinned_tag_value,
-                                        selectedTag: this.props.repo.pinned_tag_value
-                                    })
-                                } else {
-                                    this.setState({
-                                        inputTag: newInputValue,
-                                    })
-                                }
-                                
-                            }}
+                            defaultValue={[this.props.repo.pinned_tag_value]}
+                            onInputChange={(event, newInputValue) => {
+                                this.setState({
+                                    inputTag: newInputValue,
+                                })
+                            }
+                            }
                             id="controlled-tags"
                             options={this.props.repo.tags}
                             style={{ width: 300 }}
                             renderInput={(params) => (
-                                <TextField {...params} label="Tags"/>
+                                <TextField {...params} label="Tags" />
                             )}
                         />
                     </FormControl>
                 </div>
                 <div>
                     <Button variant="contained"
-                            color="default"
-                            onClick={() => this.props.flipAutoDeploy(
-                                !this.props.repo.auto_deploy, this.props.name)}>
+                        color="default"
+                        onClick={() => this.props.flipAutoDeploy(
+                            !this.props.repo.auto_deploy, this.props.name)}>
                         AutoDeploy: {this.props.repo.auto_deploy.toString()}
                     </Button>
                     <Button variant="contained"
-                            color="default"
-                            onClick={() => this.props.resetToVersionedAutoDeployment(
-                                this.props.name)}>
+                        color="default"
+                        onClick={() => this.props.resetToVersionedAutoDeployment(
+                            this.props.name)}>
                         Reset (enable autodeploy, track versioned tags)
                     </Button>
                 </div>
