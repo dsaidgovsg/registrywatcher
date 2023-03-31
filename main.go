@@ -220,6 +220,7 @@ func (h *Handler) DeployTagHandler(c *gin.Context) {
 		return
 	}
 
+
 	// check if tag is valid
 	pinnedTag := *deployBody.PinnedTag
 	tags, err := h.clients.DockerRegistryClient.GetAllTags(repoName)
