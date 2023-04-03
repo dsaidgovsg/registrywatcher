@@ -17,10 +17,8 @@ type PostgresClient struct {
 	conf *viper.Viper
 }
 
-//
 // Initialize creates tables if they do not exist
 // cloud agnostic function
-//
 func InitializePostgresClient(conf *viper.Viper) (*PostgresClient, error) {
 	client := PostgresClient{
 		conf: conf,
