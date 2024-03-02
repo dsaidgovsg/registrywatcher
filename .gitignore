@@ -4,8 +4,6 @@ registrywatcher
 !test.toml
 !sample.toml
 
-testutils/snakeoil
-
 # dependencies
 node_modules
 

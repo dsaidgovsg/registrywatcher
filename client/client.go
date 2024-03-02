@@ -5,12 +5,9 @@ import (
 	"reflect"
 	"sort"
 	"sync"
-	"testing"
 
 	"github.com/dsaidgovsg/registrywatcher/log"
 	"github.com/dsaidgovsg/registrywatcher/utils"
-	nomad "github.com/hashicorp/nomad/api"
-	"github.com/hashicorp/nomad/testutil"
 	"github.com/spf13/viper"
 )
 
@@ -21,9 +18,6 @@ type Clients struct {
 	DockerhubApi         *DockerhubApi
 	DockerTags           sync.Map
 	DigestMap            sync.Map
-
-	// for test usage only
-	NomadServer *testutil.TestServer
 }
 
 func SetUpClients(conf *viper.Viper) *Clients {
