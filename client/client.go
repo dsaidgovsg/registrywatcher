@@ -55,48 +55,6 @@ func SetUpClients(conf *viper.Viper) *Clients {
 	return &clients
 }
 
-func SetUpTestClients(t *testing.T, conf *viper.Viper) *Clients {
-	postgresClient, err := InitializePostgresClient(conf)
-	if err != nil {
-		panic(fmt.Errorf("starting postgres client failed: %v", err))
-
-	}
-
-	// Create server
-	config := nomad.DefaultConfig()
-	ns := testutil.NewTestServer(t, nil)
-	config.Address = "http://" + ns.HTTPAddr
-
-	// Create client
-	client, err := nomad.NewClient(config)
-	if err != nil {
-		panic(fmt.Errorf("starting nomad client failed: %v", err))
-	}
-	nc := NomadClient{
-		nc:   client,
-		conf: conf,
-	}
-
-	// caching fields
-	dockerTags := sync.Map{}
-	digestMap := sync.Map{}
-	for _, repoName := range conf.GetStringSlice("watched_repositories") {
-		dockerTags.Store(repoName, []string{})
-		digestMap.Store(repoName, "")
-	}
-
-	clients := Clients{
-		NomadClient:          &nc,
-		NomadServer:          ns,
-		PostgresClient:       postgresClient,
-		DockerRegistryClient: InitializeDockerRegistryClient(conf),
-		DockerhubApi:         nil,
-		DockerTags:           dockerTags,
-		DigestMap:            digestMap,
-	}
-	return &clients
-}
-
 func (client *Clients) GetCachedTags(repoName string) ([]string, error) {
 	rtn, ok := client.DockerTags.Load(repoName)
 	if !ok {

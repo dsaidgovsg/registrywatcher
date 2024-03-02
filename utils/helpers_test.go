@@ -1,12 +1,10 @@
-//go:build unit
-// +build unit
-
 package utils
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTagToNumber(t *testing.T) {
