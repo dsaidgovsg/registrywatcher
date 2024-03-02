@@ -35,7 +35,7 @@ steps:
     environment:
     - GOPATH=/codefresh/volume/.go
     commands:
-    - ./test.sh
+    - make test
     when:
       steps:
       - name: build_builder
