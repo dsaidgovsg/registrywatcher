@@ -24,13 +24,19 @@ type AuthenticateResp struct {
 	Token string `json:"token"`
 }
 
-type CheckImageResp struct {
-	Results []TagWithStatus `json:"results"`
+type GetRepoTagsResp struct {
+	Results []RepoTag `json:"results"`
 }
 
-type TagWithStatus struct {
-	Tag       string `json:"tag"`
-	IsCurrent bool   `json:"is_current"`
+type RepoTag struct {
+	// Tag string `json:"tag"`
+	// IsCurrent bool   `json:"is_current"`
+	Name   string      `json:"name"`
+	Images []RepoImage `json:"images"`
+}
+
+type RepoImage struct {
+	Digest string `json:"digest"`
 }
 
 type GetTagDigestResp struct {
@@ -38,8 +44,8 @@ type GetTagDigestResp struct {
 }
 
 type GetTagDigestResult struct {
-	Digest string          `json:"digest"`
-	Tags   []TagWithStatus `json:"tags"`
+	Digest string    `json:"digest"`
+	Tags   []RepoTag `json:"tags"`
 }
 
 func InitializeDockerhubApi(conf *viper.Viper) (*DockerhubApi, error) {
@@ -89,10 +95,9 @@ func (api *DockerhubApi) Authenticate() (*string, error) {
 	return &deserialized.Token, nil
 }
 
-func (api *DockerhubApi) CheckImageIsCurrent(repository, digest string, checkTag string) (
+func (api *DockerhubApi) CheckImageIsCurrent(repository, digest string, tagName string) (
 	*bool, error) {
-	endpoint := fmt.Sprintf("/v2/namespaces/%s/repositories/%s/images/%s/tags",
-		api.namespace, repository, digest)
+	endpoint := fmt.Sprintf("/v2/namespaces/%s/repositories/%s/tags", api.namespace, repository)
 	addr := fmt.Sprintf("%s%s", api.url, endpoint)
 	log.LogAppInfo(fmt.Sprintf("dockerhub check if image is current, url=%s", addr))
 
@@ -129,28 +134,28 @@ func (api *DockerhubApi) CheckImageIsCurrent(repository, digest string, checkTag
 		return nil, errors.New(errMsg)
 	}
 
-	var deserialized CheckImageResp
+	var deserialized GetRepoTagsResp
 	json.Unmarshal(body, &deserialized)
 
 	for _, item := range deserialized.Results {
-		if item.Tag == checkTag {
-			return &item.IsCurrent, nil
+		if item.Name == tagName {
+			isCurrent := item.Images[0].Digest == digest
+			return &isCurrent, nil
 		}
 	}
 	// image tag does not match the tag to be checked
 	// this means the cached digest belongs to a previous tag
 	// return false (not current) because we want the cache to be updated
-	log.LogAppInfo(fmt.Sprintf(fmt.Sprintf("Digest %s does not have tag %s", digest, checkTag)))
+	log.LogAppInfo(fmt.Sprintf(fmt.Sprintf("Digest %s does not have tag %s", digest, tagName)))
 	isCurrent := false
 	return &isCurrent, nil
 }
 
 // Note that the digest returned from the Dockerhub API does not match
 // the digest from docker registry manifest V2 API
-func (api *DockerhubApi) GetTagDigestFromApi(repository string, checkTag string) (
+func (api *DockerhubApi) GetTagDigestFromApi(repository string, tagName string) (
 	*string, error) {
-	endpoint := fmt.Sprintf("/v2/namespaces/%s/repositories/%s/images?", api.namespace,
-		repository)
+	endpoint := fmt.Sprintf("/v2/namespaces/%s/repositories/%s/tags", api.namespace, repository)
 	queryParams := fmt.Sprintf("currently_tagged=%s&page_size=%s&ordering=%s", "true",
 		"100", "-last_activity")
 
@@ -190,17 +195,15 @@ func (api *DockerhubApi) GetTagDigestFromApi(repository string, checkTag string)
 		return nil, errors.New(errMsg)
 	}
 
-	var deserialized GetTagDigestResp
+	var deserialized GetRepoTagsResp
 	json.Unmarshal(body, &deserialized)
 
 	for _, item := range deserialized.Results {
-		for _, tag := range item.Tags {
-			if tag.Tag == checkTag && tag.IsCurrent {
-				return &item.Digest, nil
-			}
+		if item.Name == tagName {
+			return &item.Images[0].Digest, nil
 		}
 	}
 
 	// image tag not found in repository's 100 last active tags
-	return nil, errors.New(fmt.Sprintf("Tag %s not found in repository %s", checkTag, repository))
+	return nil, errors.New(fmt.Sprintf("Tag %s not found in repository %s", tagName, repository))
 }
