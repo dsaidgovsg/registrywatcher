@@ -9,12 +9,13 @@ import (
 	"github.com/dsaidgovsg/registrywatcher/log"
 	"github.com/dsaidgovsg/registrywatcher/utils"
 	"github.com/spf13/viper"
+	"gorm.io/gorm"
 )
 
 type Clients struct {
 	NomadClient          *NomadClient
 	DockerRegistryClient *DockerRegistryClient
-	PostgresClient       *PostgresClient
+	PostgresClient       *gorm.DB
 	DockerhubApi         *DockerhubApi
 	DockerTags           sync.Map
 	DigestMap            sync.Map
@@ -81,10 +82,11 @@ func (client *Clients) GetCachedTagDigest(repoName string) (string, error) {
 
 // fetches the CACHED pinned tag
 func (client *Clients) GetFormattedPinnedTag(repoName string) (string, error) {
-	pinnedTag, err := client.PostgresClient.GetPinnedTag(repoName)
-	if err != nil {
-		return "", err
-	}
+	// pinnedTag, err := client.PostgresClient.GetPinnedTag(repoName)
+	// if err != nil {
+	// 	return "", err
+	// }
+	pinnedTag := ""
 	if pinnedTag == "" {
 		tags, err := client.GetCachedTags(repoName)
 		if err != nil {
@@ -92,7 +94,7 @@ func (client *Clients) GetFormattedPinnedTag(repoName string) (string, error) {
 		}
 		pinnedTag, err = utils.GetLatestReleaseTag(tags)
 	}
-	return pinnedTag, err
+	return pinnedTag, nil
 }
 
 func (client *Clients) DeployPinnedTag(conf *viper.Viper, repoName string) {
@@ -265,21 +267,23 @@ func (client *Clients) updateCaches(repoName string) {
 // this function compares cached values with the actual values,
 // so only update the cache before returning non-error cases
 func (client *Clients) ShouldDeploy(repoName string) (bool, error) {
-	autoDeploy, err := client.PostgresClient.GetAutoDeployFlag(repoName)
-	if err != nil {
-		log.LogAppErr(fmt.Sprintf("Couldn't fetch whether to deploy flag while checking whether to deploy for %s", repoName), err)
-		return false, err
-	}
+	// autoDeploy, err := client.PostgresClient.GetAutoDeployFlag(repoName)
+	// if err != nil {
+	// 	log.LogAppErr(fmt.Sprintf("Couldn't fetch whether to deploy flag while checking whether to deploy for %s", repoName), err)
+	// 	return false, err
+	// }
+	autoDeploy := false
 	if !autoDeploy {
 		client.updateCaches(repoName)
 		return false, nil
 	}
 
-	pinnedTag, err := client.PostgresClient.GetPinnedTag(repoName)
-	if err != nil {
-		log.LogAppErr(fmt.Sprintf("Couldn't fetch pinned tag while checking whether to deploy for %s", repoName), err)
-		return false, err
-	}
+	// pinnedTag, err := client.PostgresClient.GetPinnedTag(repoName)
+	// if err != nil {
+	// 	log.LogAppErr(fmt.Sprintf("Couldn't fetch pinned tag while checking whether to deploy for %s", repoName), err)
+	// 	return false, err
+	// }
+	pinnedTag := ""
 	isDigestChanged, err := client.isTagDigestChanged(repoName)
 	if err != nil {
 		log.LogAppErr(fmt.Sprintf("Couldn't check tag digest changed while checking whether to deploy for %s", repoName), err)

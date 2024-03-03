@@ -2,14 +2,13 @@ package client
 
 import (
 	"database/sql"
-	"math"
-	"os"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type PostgresClient struct {
@@ -19,47 +18,52 @@ type PostgresClient struct {
 
 // Initialize creates tables if they do not exist
 // cloud agnostic function
-func InitializePostgresClient(conf *viper.Viper) (*PostgresClient, error) {
-	client := PostgresClient{
-		conf: conf,
-	}
-	var dburl string
-	if len(os.Getenv("DATABASE_URL")) > 0 {
-		dburl = os.Getenv("DATABASE_URL")
-	} else {
-		dburl = conf.GetString("database_url")
-	}
-	createSchema := conf.GetBool("create_database_schema")
+func InitializePostgresClient(conf *viper.Viper) (*gorm.DB, error) {
+	// client := PostgresClient{
+	// 	conf: conf,
+	// }
+	// var dburl string
+	// if len(os.Getenv("DATABASE_URL")) > 0 {
+	// 	dburl = os.Getenv("DATABASE_URL")
+	// } else {
+	// 	dburl = conf.GetString("database_url")
+	// }
+	// createSchema := conf.GetBool("create_database_schema")
 
-	var err error
-	if client.db, err = sqlx.Open("postgres", dburl); err != nil {
-		return &client, errors.Wrap(err, "unable to open postgres db")
-	}
+	// var err error
+	// if client.db, err = sqlx.Open("postgres", dburl); err != nil {
+	// 	return &client, errors.Wrap(err, "unable to open postgres db")
+	// }
 
-	if createSchema {
-		// Since this happens at initialization we
-		// could encounter racy conditions waiting for pg
-		// to become available. Wait for it a bit
-		if err = client.db.Ping(); err != nil {
-			// Try 3 more times
-			// 5, 10, 20
-			for i := 0; i < 3 && err != nil; i++ {
-				time.Sleep(time.Duration(5*math.Pow(2, float64(i))) * time.Second)
-				err = client.db.Ping()
-			}
-			if err != nil {
-				return &client, errors.Wrap(err, "error trying to connect to postgres db, retries exhausted")
-			}
-		}
+	// if createSchema {
+	// 	// Since this happens at initialization we
+	// 	// could encounter racy conditions waiting for pg
+	// 	// to become available. Wait for it a bit
+	// 	if err = client.db.Ping(); err != nil {
+	// 		// Try 3 more times
+	// 		// 5, 10, 20
+	// 		for i := 0; i < 3 && err != nil; i++ {
+	// 			time.Sleep(time.Duration(5*math.Pow(2, float64(i))) * time.Second)
+	// 			err = client.db.Ping()
+	// 		}
+	// 		if err != nil {
+	// 			return &client, errors.Wrap(err, "error trying to connect to postgres db, retries exhausted")
+	// 		}
+	// 	}
 
-		if err = client.createTables(); err != nil {
-			return &client, errors.Wrap(err, "problem executing create tables sql")
-		}
-		if err = client.initRows(); err != nil {
-			return &client, errors.Wrap(err, "problem executing init row sql")
-		}
+	// 	if err = client.createTables(); err != nil {
+	// 		return &client, errors.Wrap(err, "problem executing create tables sql")
+	// 	}
+	// 	if err = client.initRows(); err != nil {
+	// 		return &client, errors.Wrap(err, "problem executing init row sql")
+	// 	}
+	// }
+	dsn := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
 	}
-	return &client, nil
+	return db, nil
 }
 
 func (client *PostgresClient) createTables() error {
