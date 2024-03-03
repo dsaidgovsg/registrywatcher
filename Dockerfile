@@ -1,4 +1,4 @@
-FROM golang:1.17-alpine as builder
+FROM golang:1.19-alpine as builder
 ARG UPX_VERSION=3.95
 
 WORKDIR /app
@@ -11,14 +11,7 @@ RUN go mod download
 # Then build the binary
 COPY ./ ./
 
-RUN set -euo pipefail && \
-    go build -v -ldflags "-linkmode external -extldflags -static -s -w"; \
-    wget https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-amd64_linux.tar.xz; \
-    tar xvf upx-${UPX_VERSION}-amd64_linux.tar.xz; \
-    mv upx-${UPX_VERSION}-amd64_linux/upx /usr/local/bin/; \
-    rm -r upx-${UPX_VERSION}-amd64_linux upx-${UPX_VERSION}-amd64_linux.tar.xz; \
-    upx --best --lzma registrywatcher; \
-    :
+RUN go build
 
 FROM alpine:3.9 as release
 WORKDIR /app
