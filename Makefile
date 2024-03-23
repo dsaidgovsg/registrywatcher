@@ -1,12 +1,41 @@
-# Setup name variables for the package/tool
-NAME := registrywatcher
-PKG := github.com/dsaidgovsg/$(NAME)
+all: fmt lint test
 
-GOROOT := $(shell go env | grep GOROOT | cut -b 8-)
+test:
+	@echo "===================================="
+	@echo "########## Running tests ##########"
+	@echo "===================================="
+	@ENV=test go test ./...
+	@echo "================= OK ================="
+	@echo ""
 
-.PHONY: snakeoil
-snakeoil: ## Update snakeoil certs for testing.
-	go run $(GOROOT)/src/crypto/tls/generate_cert.go --host localhost,127.0.0.1 --ca
-	mkdir -p testutils/snakeoil
-	mv cert.pem $(CURDIR)/testutils/snakeoil/cert.pem
-	mv key.pem $(CURDIR)/testutils/snakeoil/key.pem
+fmt:
+	@echo "===================================="
+	@echo "######### Formatting code ##########"
+	@echo "===================================="
+	@goimports-reviser -rm-unused -imports-order "std,company,project,general" ./...
+	@gofmt -l -w .
+	@echo "================= OK ================="
+	@echo ""
+
+fmt-check:
+	@echo "===================================="
+	@echo "####### Checking Formatting ########"
+	@echo "===================================="
+	@goimports-reviser -list-diff -imports-order "std,company,project,general" ./...
+	@files=$(gofmt -l .) && [ -z "$files" ]
+	@echo "================= OK ================="
+	@echo ""
+
+lint:
+	@echo "===================================="
+	@echo "########## Linting code ###########"
+	@echo "===================================="
+	@golangci-lint run
+	@echo "================= OK ================="
+	@echo ""
+
+test-env:
+	./env/test/script.sh
+
+dev:
+	docker compose -f env/dev/docker-compose.yml up --build

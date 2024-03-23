@@ -1,0 +1,27 @@
+version: '3'
+services:
+  testenv:
+    container_name: test-env
+    build:
+      context: ../../
+      dockerfile: env/test/Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ../../:/app
+    environment:
+      - ENV=test
+    depends_on:
+      - db
+
+  db:
+    container_name: test-db
+    image: postgres:16.2-alpine
+    ports:
+      - 5432:5432
+    tmpfs:
+      - /var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=tester
+      - POSTGRES_PASSWORD=abcdefg
+      - POSTGRES_DB=playground
