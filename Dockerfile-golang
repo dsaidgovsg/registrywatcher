@@ -1,4 +1,0 @@
-FROM golang:1.17-alpine
-
-# Only install hard dependencies
-RUN apk add --no-cache gcc git musl-dev make
